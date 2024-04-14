@@ -1,8 +1,6 @@
 # 获取市场的实时行情
 
 
-
-
 import pandas as pd
 import akshare as ak
 from datetime import date
@@ -12,7 +10,8 @@ import os
 # 1. 获取股票的实时行情
 def pick_stock():
     current_date = date.today()
-    file_name = "D:\\abu\\all\\{current_date}.csv"
+    current_date = current_date.strftime('%Y%m%d')
+    file_name = f"D:\\abu\\all\\{current_date}"
     if os.path.exists(file_name):
         stock_data = pd.read_csv(file_name)
         # stock_data.rename(columns=column_names, inplace=True)
@@ -22,76 +21,89 @@ def pick_stock():
         stock_data.to_csv(file_name, index=False)
     return stock_data
 
-    # stock_code_data = pd.read_csv('20240409.csv')
-    # 循环获取
-    # for i in stock_code_data['代码']:
 
-
-def get_stock_data_by_name(symbol, start_date='20230410', end_date='20240410'):
-    file_name = "D:\\abu\\stock\\{symbol}_{start_date}_{end_date}.csv"
-    column_names = {'日期': 'date', '开盘': 'open', '收盘': 'close', '最高': 'high', '最低': 'low', '成交量': 'volume'}
-
+def pick_stock_by_date(current_date):
+    global stock_data
+    file_name = f"D:\\abu\\all\\{current_date}"
     if os.path.exists(file_name):
         stock_data = pd.read_csv(file_name)
         # stock_data.rename(columns=column_names, inplace=True)
-        # print('get data from file')
+        print('get data from file')
     else:
-        try:
-            stock_data = ak.stock_zh_a_hist(symbol, period='daily', start_date=start_date, end_date=end_date, adjust="")
-            stock_data = stock_data.rename(columns=column_names)
-            selected_columns = stock_data.filter(items=column_names.values())
-            selected_columns.to_csv(file_name, index=False)
-        except Exception as e:
-            print("获取数据失败，错误信息：{e}")
-            return pd.DataFrame()
-
+        print('get data from file error')
     return stock_data
+
+
+def get_stock_data_by_name(symbol, start_date='20230410', end_date='20240410'):
+    file_name = f"D:\\abu\\stock\\{symbol}_{start_date}_{end_date}"
+    column_names = {'日期': 'date', '开盘': 'open', '收盘': 'close', '最高': 'high', '最低': 'low', '成交量': 'volume'}
+
+    # print("file_name size : {}".format(os.path.getsize(file_name)))
+    if os.path.exists(file_name) and os.path.getsize(file_name) > 2:
+        try:
+            stock_tmp_data = pd.read_csv(file_name)
+            return stock_tmp_data
+        except Exception as e:
+            print(f"读取文件失败，错误信息：{e}")
+            return None
+    else:
+        return None
 
 
 # 2. 将每个股票的实时行情保存到历史数据
-def save_all_stock_data(stock_data):
-    # 打印stock_data的股票代码
-    print(stock_data['代码'])
-    return stock_data
+def update_all_stock_data():
+    """
+    使用最新的实时数据来更新历史数据
+    0、更新之前先备份一下数据
+    1、start_date end_date 是全部最新数据文件
+    2、更新获取最新数据
 
+    """
+    start_date = 20240410
+    end_date = 20240412
 
+    # 循环start_date到end_date
+    cur_start_date = '20230410'
+    for i in range(start_date, end_date):
+        current_date = str(i + 1)
+        stock_latest_data = pick_stock_by_date(current_date)
+        if stock_latest_data is None:
+            continue
 
+        # 将20240410 变为 2024-04-10
+        save_current_date = f"{current_date[:4]}-{current_date[4:6]}-{current_date[6:]}"
+        for j in stock_latest_data['代码']:
+            # 开头是8的股票代码，不处理
+            code = f"{j:06}"
+            if code[0] == '8':
+                continue
+            stock_data = get_stock_data_by_name(code, cur_start_date, str(start_date))
+            if stock_data is None or stock_data.size == 0:
+                continue
 
+            # 使用concat函数将新数据添加到现有的DataFrame中
+            stock_new_data = stock_latest_data[stock_latest_data['代码'] == j]
+            new_data = pd.DataFrame({'date': [save_current_date], 'open': [stock_new_data['今开'].iloc[0]]
+                                        , 'close': [stock_new_data['最新价'].iloc[0]],
+                                     'high': [stock_new_data['最高'].iloc[0]]
+                                        , 'low': [stock_new_data['最低'].iloc[0]],
+                                     'volume': [stock_new_data['成交量'].iloc[0]]})
+
+            stock_data = pd.concat([stock_data, new_data], ignore_index=True)
+
+            file_name = f"D:\\abu\\stock\\{code}_{cur_start_date}_{current_date}"
+            stock_data.to_csv(file_name, index=False)
+
+            # 删除文件，不删除文件可以进行每天测试
+            # file_name = f"D:\\abu\\stock\\{code}_{cur_start_date}_{start_date}"
+            # if os.path.exists(file_name):
+            #     os.remove(file_name)
+        start_date = i + 1
 
 
 if __name__ == '__main__':
-    current_date = date.today()
-    stock_lastest_data = pick_stock()
-    stock_lastest_data['代码'] = stock_lastest_data['代码'].astype(str)
-    stock_data_300795 = stock_lastest_data[stock_lastest_data['代码'] == '688691']
-    print(stock_data_300795)
-    new_data = pd.DataFrame({'date': [current_date], 'open': [stock_data_300795['今开'][0]]
-                             , 'close': [stock_data_300795['最新价'][0]], 'high': [stock_data_300795['最高'][0]]
-                             , 'low': [stock_data_300795['最低'][0]], 'volume': [stock_data_300795['成交量'][0]]})
-    print(type(stock_lastest_data))
-    print(new_data.head())
-    # print(stock_data_300795['今开'][0])
-    
-
-    stock_data = get_stock_data_by_name('000001')
-    print(stock_data.head())
-    # stock_data = stock_data.append(new_data)
-    # stock_data.to_csv('688691.csv', ignore_index=True)
-
-    # new_data = pd.DataFrame({'column1': ['value1'], 'column2': ['value2']})
-
-
-
-    # for i in stock_lastest_data['代码']:
-    #     # 开头是8的股票代码，不处理
-    #     code = f"{i:06}"
-    #     if code[0] == '8':
-    #         continue
-    #     stock_data = get_stock_data_by_name(code)
-    #     # 增加一条数据
-        
-    #     stock_data.append(stock_data)
-
-
-
-    # print(stock_data['代码'])
+    # 1、获取股票的实时行情
+    pick_stock()
+    # 2、将每个股票的实时行情保存到历史数据
+    update_all_stock_data()
+    # 3、对数据进行选股
