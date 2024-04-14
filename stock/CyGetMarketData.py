@@ -130,16 +130,57 @@ def back_test(dfData, N):
     plt.show()
 
 
+def back_test_open(dfData, N):
+    # 二八轮动：有空仓版
+    df = dfData.copy()
+    df['ret_300'] = df['open'].pct_change()
+    # df['N_day_ret_500'] = df['csi500'] / df['csi500'].shift(N) - 1
+
+    df['hs300_moving_average'] = df['open'].rolling(window=N).mean()
+
+    df['wgt_300'] = 0
+    # df['wgt_500'] = 0
+    for i in range(1, len(df)):
+        if i < N:
+            continue
+        t = df.index[i]
+        t0 = df.index[i]
+        if df.loc[t0, 'open'] >= df.loc[t0, 'hs300_moving_average']:
+            df.loc[t, 'wgt_300'] = 1
+    df['ret_stgy_300'] = df['ret_300'] * df['wgt_300']
+    df['stgy_300'] = (1 + df['ret_stgy_300']).cumprod().fillna(1)
+
+    res = cal_period_perf_indicator(df.loc[:, ['open', 'stgy_300']])
+    print("====================back_test {} ".format(N))
+    print(res)
+
+    # 归一化
+    # df['close_norm'] = (df['open'] - df['open'].min()) / (df['open'].max() - df['open'].min())
+    # df['stgy_300_norm'] = (df['stgy_300'] - df['stgy_300'].min()) / (df['stgy_300'].max() - df['stgy_300'].min())
+    # # 画图
+    # fig = plt.figure(figsize=(20, 10))
+    # ax1 = fig.add_subplot(2, 1, 1)
+    # df.loc[:, ['open_norm', 'stgy_300_norm']].plot(ax=ax1, grid=True)
+    # plt.xlim(df.index[0], df.index[-1])
+    #
+    # ax2 = fig.add_subplot(2, 1, 2)
+    # df[['wgt_300']].plot(ax=ax2, kind='area', stacked=True, grid=True)
+    # plt.xlim(df.index[0], df.index[-1])
+    # plt.legend()
+    # plt.show()
+
+
 def back_test_new(N=5):
     stock_data = get_stock_data_by_name('600519').set_index('day')
     stock_data.index = [datestr2dtdate(e) for e in stock_data.index]
     back_test(stock_data, N)
+    back_test_open(stock_data, N)
 
 
 if __name__ == '__main__':
     # back_test_new()
     # back_test_new(10)
-    # back_test_new(20)
+    back_test_new(20)
     # back_test_new(30)
     # back_test_new(60)
     back_test_new(120)

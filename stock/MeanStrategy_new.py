@@ -63,7 +63,7 @@ def back_test(dfData , N):
         if i < N:
             continue
         t = df.index[i]
-        t0 = df.index[i]
+        t0 = df.index[i-1]
         if df.loc[t0, 'hs300'] >= df.loc[t0, 'hs300_moving_average']:
             df.loc[t, 'wgt_300'] = 1
 
@@ -96,11 +96,11 @@ if __name__ == '__main__':
     index_price = pd.read_csv('date/300和500历史数据.csv').set_index('datetime')
     index_price.index = [datestr2dtdate(e) for e in index_price.index]
     # back_test(index_price, 1)
-    back_test(index_price, 5)
+    # back_test(index_price, 5)
     # back_test(index_price, 10)
-    # back_test(index_price, 20)
+    back_test(index_price, 20)
     # back_test(index_price, 30)
     # back_test(index_price, 60)
-    # back_test(index_price, 90)
-    # back_test(index_price, 120)
-    # back_test(index_price, 250)
+    back_test(index_price, 90)
+    back_test(index_price, 120)
+    back_test(index_price, 250)
