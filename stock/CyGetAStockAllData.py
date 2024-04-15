@@ -136,7 +136,7 @@ if __name__ == '__main__':
     进行选股,主要测试通过价格和成交量选股
     """
     start_time = time.time()
-    pick_stock(end_date='20240412')
+    pick_stock(end_date='20240415')
     # get_all_stock_data()
     end_time = time.time()
     print(f"耗时：{end_time - start_time}")
