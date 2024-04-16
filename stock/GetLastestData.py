@@ -149,7 +149,12 @@ def update_all_stock_data_simple(start_date='20240410', end_date='20240412', all
 
 
 
-
+"""
+todo list
+1、获取20240416的数据 get_all_latest_stock()
+2、更新个单数据update_all_stock_data_simple("20230410", "20240415", "20240416")
+3、选股
+"""
 if __name__ == '__main__':
     # 1、获取股票的实时行情
     get_all_latest_stock()
@@ -158,5 +163,6 @@ if __name__ == '__main__':
     # current_date = current_date.strftime('%Y%m%d')
     # update_all_stock_data(start_date=int(current_date)-1, end_date=int(current_date), single_end_data=20240412)
 
-    update_all_stock_data_simple("20230410", "20240412", "20240415")
+    update_all_stock_data_simple("20230410", "20240415", "20240416")
     # 3、对数据进行选股
+

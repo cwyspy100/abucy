@@ -51,7 +51,9 @@ def get_all_stock_data():
 
 def pick_stock(start_date='20230410', end_date='20240410'):
     stock_code_data = pd.read_csv('20240409.csv')
-    choose_stock = []
+    choose_stock_mean = []
+    choose_stock_volume = []
+
     # 循环获取
     for i in stock_code_data['代码']:
 
@@ -60,15 +62,31 @@ def pick_stock(start_date='20230410', end_date='20240410'):
         if code[0] == '8':
             continue
         result1 = execute_strategy_mean(code, start_date, end_date)
-        result2 = execute_strategy_volume(code, start_date, end_date)
-        if result1 and result2:
-            choose_stock.append(code)
+        if result1:
+            choose_stock_mean.append(code)
 
-    print("choose stock size:", len(choose_stock))
-    print(f"选中的股票代码：{choose_stock}")
+    # 循环获取
+    for i in stock_code_data['代码']:
+
+        # 开头是8的股票代码，不处理
+        code = f"{i:06}"
+        if code[0] == '8':
+            continue
+        result2 = execute_strategy_volume(code, start_date, end_date)
+        if result2:
+            choose_stock_volume.append(code)
+
+    # print("choose stock size:", len(choose_stock))
+    # print(f"选中的股票代码：{choose_stock}")
     # 将选中的股票代码写入文件
-    with open(f"D:\\abu\\result\\choose_stock_{end_date}.txt", 'w') as f:
-        for item in choose_stock:
+    # 写入设置utf8编码
+
+    with open(f"D:\\abu\\result\\choose_stock_{end_date}.txt", 'w', encoding="utf-8") as f:
+        f.write("--------------价格和120日均线选股策略\n")
+        for item in choose_stock_mean:
+            f.write(f"{item}\n")
+        f.write("---------------成交量选股策略\n")
+        for item in choose_stock_volume:
             f.write(f"{item}\n")
 
 
@@ -136,7 +154,7 @@ if __name__ == '__main__':
     进行选股,主要测试通过价格和成交量选股
     """
     start_time = time.time()
-    pick_stock(end_date='20240415')
+    pick_stock(end_date='20240416')
     # get_all_stock_data()
     end_time = time.time()
     print(f"耗时：{end_time - start_time}")
