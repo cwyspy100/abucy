@@ -7,3 +7,5 @@
 从GetAllStockData.py中获取数据
     3、选股
 
+ 更新最近几天的涨跌幅
+
