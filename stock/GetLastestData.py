@@ -148,21 +148,148 @@ def update_all_stock_data_simple(start_date='20240410', end_date='20240412', all
             os.remove(file_name)
 
 
+def pick_stock(start_date='20230410', end_date='20240410'):
+    stock_code_data = pd.read_csv('20240409.csv')
+    choose_stock_mean = []
+    choose_stock_volume = []
+
+    # 循环获取
+    for i in stock_code_data['代码']:
+
+        # 开头是8的股票代码，不处理
+        code = f"{i:06}"
+        if code[0] == '8':
+            continue
+        result1 = execute_strategy_mean(code, start_date, end_date)
+        if result1:
+            choose_stock_mean.append(code)
+
+    # 循环获取
+    for i in stock_code_data['代码']:
+
+        # 开头是8的股票代码，不处理
+        code = f"{i:06}"
+        if code[0] == '8':
+            continue
+        result2 = execute_strategy_volume(code, start_date, end_date)
+        if result2:
+            choose_stock_volume.append(code)
+
+    # print("choose stock size:", len(choose_stock))
+    # print(f"选中的股票代码：{choose_stock}")
+    # 将选中的股票代码写入文件
+    # 写入设置utf8编码
+
+    with open(f"D:\\abu\\result\\choose_stock_{end_date}", 'w', encoding="utf-8") as f:
+        # f.write("--------------价格和120日均线选股策略\n")
+        for item in choose_stock_mean:
+            f.write(f"{item}\n")
+        # f.write("---------------成交量选股策略\n")
+        for item in choose_stock_volume:
+            f.write(f"{item}\n")
+
+
+def execute_strategy_mean(code, start_date='20230410', end_date='20240410'):
+    """
+    这是一个价格和120日均线的选股策略
+    """
+    try:
+        stock_data = get_stock_data_by_name(code, start_date, end_date)
+
+        if len(stock_data) < 120:
+            return False
+
+        # 计算120日均线
+        stock_data['120日均线'] = stock_data['close'].rolling(window=120).mean()
+        # 计算120均线最后一个数据
+        last_120 = stock_data['120日均线'].iloc[-1]
+        last_stock_close = stock_data['close'].iloc[-1]
+
+        yesterday_120 = stock_data['120日均线'].iloc[-2]
+        yesterday_last_stock_close = stock_data['close'].iloc[-2]
+
+        if last_stock_close > last_120 and yesterday_120 > yesterday_last_stock_close:
+            print(f"{code}股票价格{last_stock_close}大于120日均线{last_120}")
+            return True
+        return False
+    except Exception as e:
+        print(f"获取数据失败，错误信息：{e} {code}")
+        return False
+
+
+def execute_strategy_volume(code, start_date='20230410', end_date='20240410'):
+    """
+    这是一个成家量的选股策略
+    """
+    try:
+        stock_data = get_stock_data_by_name(code, start_date, end_date)
+
+        if len(stock_data) < 120:
+            return False
+
+        last_stock_volume = stock_data['volume'].iloc[-1]
+        yesterday_1 = stock_data['volume'].iloc[-2]
+        yesterday_2 = stock_data['volume'].iloc[-3]
+        yesterday_3 = stock_data['volume'].iloc[-4]
+        yesterday_stock_volume = (yesterday_1 + yesterday_2 + yesterday_3) / 3
+
+        # 价格筛选
+        stock_data['120日均线'] = stock_data['close'].rolling(window=120).mean()
+        # 计算120均线最后一个数据
+        last_120 = stock_data['120日均线'].iloc[-1]
+        last_stock_close = stock_data['close'].iloc[-1]
+
+        if last_stock_volume > yesterday_stock_volume * 3 and last_stock_volume > yesterday_1 * 3 and last_stock_close > last_120:
+            print(f"{code}股票价格{last_stock_close}大于120日成交量的3倍{yesterday_stock_volume * 3}")
+            return True
+        return False
+    except Exception as e:
+        print(f"获取数据失败，错误信息：{e} {code}")
+        return False
+
+
+def check_choose_stock_change(check_date, get_data_date):
+    file_name = f"D:\\abu\\all\\{get_data_date}"
+    file_name_check = f"D:\\abu\\result\\choose_stock_{check_date}"
+    p_change = []
+    stock_data = pd.read_csv(file_name)
+    # 读取文件所有内容
+    with open(file_name_check, 'r', encoding="utf-8") as f:
+        # 读取文件所有内容
+        # print(f.readlines())
+        # print(type(f.readlines()))
+        for i in f.readlines():
+            # print(i.strip())
+            # 从stock_data中找到对应的股票代码的涨跌幅
+            stock_tmp_data = stock_data[stock_data['代码'] == int(i.strip())]
+            # 获取涨跌幅的值
+            # print("code {} : change {}".format(i.strip(), stock_tmp_data['涨跌幅'].iloc[0]))
+            p_change.append("code {} : change {}".format(i.strip(), stock_tmp_data['涨跌幅'].iloc[0]))
+
+    with open(f"D:\\abu\\result\\choose_stock_{check_date}_pchange", 'w', encoding="utf-8") as f:
+        # f.write("--------------价格和120日均线选股策略\n")
+        for item in p_change:
+            f.write(f"{item}\n")
 
 """
 todo list
 1、获取20240416的数据 get_all_latest_stock()
 2、更新个单数据update_all_stock_data_simple("20230410", "20240415", "20240416")
-3、选股
+3、选股，1，2,3 可以同时，但是 4  需要单独执行
 """
 if __name__ == '__main__':
+    current_date = 20240416
+    check_date = current_date - 1
+
     # 1、获取股票的实时行情
     get_all_latest_stock()
     # 2、将每个股票的实时行情保存到历史数据，更新多天有问题
-    # current_date = date.today()
-    # current_date = current_date.strftime('%Y%m%d')
-    # update_all_stock_data(start_date=int(current_date)-1, end_date=int(current_date), single_end_data=20240412)
-
-    update_all_stock_data_simple("20230410", "20240415", "20240416")
+    update_all_stock_data_simple("20230410", "20240416", str(current_date))
     # 3、对数据进行选股
+    pick_stock(end_date=str(current_date))
+
+    # 4、监控昨天选股情况
+    # check_choose_stock_change(20240412, 20240415)
+
+    # 4、回测股票
 

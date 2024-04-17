@@ -81,6 +81,8 @@ def pick_stock(start_date='20230410', end_date='20240410'):
     # 将选中的股票代码写入文件
     # 写入设置utf8编码
 
+
+
     with open(f"D:\\abu\\result\\choose_stock_{end_date}", 'w', encoding="utf-8") as f:
         # f.write("--------------价格和120日均线选股策略\n")
         for item in choose_stock_mean:
@@ -154,15 +156,15 @@ if __name__ == '__main__':
     进行选股,主要测试通过价格和成交量选股
     """
     start_time = time.time()
-    # pick_stock(end_date='20240416')
+    # pick_stock(end_date='20240417')
     # get_all_stock_data()
     end_time = time.time()
     print(f"耗时：{end_time - start_time}")
 
 
-    file_name = f"D:\\abu\\all\\{20240416}"
-    file_name_check = f"D:\\abu\\result\\choose_stock_{20240415}"
-
+    file_name = f"D:\\abu\\all\\{20240417}"
+    file_name_check = f"D:\\abu\\result\\choose_stock_{20240416}"
+    p_change = []
     stock_data = pd.read_csv(file_name)
     # 读取文件所有内容
     with open(file_name_check, 'r', encoding="utf-8") as f:
@@ -174,8 +176,13 @@ if __name__ == '__main__':
             # 从stock_data中找到对应的股票代码的涨跌幅
             stock_tmp_data = stock_data[stock_data['代码'] == int(i.strip())]
             # 获取涨跌幅的值
-            print("code {} : change {}".format(i.strip(), stock_tmp_data['涨跌幅'].iloc[0]))
+            # print("code {} : change {}".format(i.strip(), stock_tmp_data['涨跌幅'].iloc[0]))
+            p_change.append("code {} : change {}".format(i.strip(), stock_tmp_data['涨跌幅'].iloc[0]))
 
 
+    with open(f"D:\\abu\\result\\choose_stock_{20240416}_pchange", 'w', encoding="utf-8") as f:
+        # f.write("--------------价格和120日均线选股策略\n")
+        for item in p_change:
+            f.write(f"{item}\n")
 
 
