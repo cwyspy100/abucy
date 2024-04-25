@@ -11,7 +11,7 @@ import os
 def get_all_latest_stock():
     current_date = date.today()
     current_date = current_date.strftime('%Y%m%d')
-    file_name = f"D:\\abu\\all\\{current_date}"
+    file_name = f"D:\\abu\\cn\\all\\{current_date}"
     if os.path.exists(file_name):
         stock_data = pd.read_csv(file_name)
         # stock_data.rename(columns=column_names, inplace=True)
@@ -24,7 +24,7 @@ def get_all_latest_stock():
 
 def pick_stock_by_date(current_date):
     global stock_data
-    file_name = f"D:\\abu\\all\\{current_date}"
+    file_name = f"D:\\abu\\cn\\all\\{current_date}"
     if os.path.exists(file_name):
         stock_data = pd.read_csv(file_name)
         # stock_data.rename(columns=column_names, inplace=True)
@@ -35,7 +35,7 @@ def pick_stock_by_date(current_date):
 
 
 def get_stock_data_by_name(symbol, start_date='20230410', end_date='20240410'):
-    file_name = f"D:\\abu\\stock\\{symbol}_{start_date}_{end_date}"
+    file_name = f"D:\\abu\\cn\\stock\\{symbol}_{start_date}_{end_date}"
     column_names = {'日期': 'date', '开盘': 'open', '收盘': 'close', '最高': 'high', '最低': 'low', '成交量': 'volume'}
 
     # print("file_name size : {}".format(os.path.getsize(file_name)))
@@ -96,7 +96,7 @@ def update_all_stock_data(start_date=20240410, end_date=20240412, single_end_dat
 
             stock_data = pd.concat([stock_data, new_data], ignore_index=True)
 
-            file_name = f"D:\\abu\\stock\\{code}_{cur_start_date}_{current_date}"
+            file_name = f"D:\\abu\\cn\\stock\\{code}_{cur_start_date}_{current_date}"
             stock_data.to_csv(file_name, index=False)
 
             # 删除文件，不删除文件可以进行每天测试
@@ -139,11 +139,11 @@ def update_all_stock_data_simple(start_date='20240410', end_date='20240412', all
 
         stock_data = pd.concat([stock_data, new_data], ignore_index=True)
 
-        file_name = f"D:\\abu\\stock\\{code}_{start_date}_{all_stock_file_date}"
+        file_name = f"D:\\abu\\cn\\stock\\{code}_{start_date}_{all_stock_file_date}"
         stock_data.to_csv(file_name, index=False)
 
         # 删除文件，不删除文件可以进行每天测试
-        file_name = f"D:\\abu\\stock\\{code}_{start_date}_{end_date}"
+        file_name = f"D:\\abu\\cn\\stock\\{code}_{start_date}_{end_date}"
         if os.path.exists(file_name):
             os.remove(file_name)
 
@@ -165,22 +165,22 @@ def pick_stock(start_date='20230410', end_date='20240410'):
             choose_stock_mean.append(code)
 
     # 循环获取
-    for i in stock_code_data['代码']:
-
-        # 开头是8的股票代码，不处理
-        code = f"{i:06}"
-        if code[0] == '8':
-            continue
-        result2 = execute_strategy_volume(code, start_date, end_date)
-        if result2:
-            choose_stock_volume.append(code)
+    # for i in stock_code_data['代码']:
+    #
+    #     # 开头是8的股票代码，不处理
+    #     code = f"{i:06}"
+    #     if code[0] == '8':
+    #         continue
+    #     result2 = execute_strategy_volume(code, start_date, end_date)
+    #     if result2:
+    #         choose_stock_volume.append(code)
 
     # print("choose stock size:", len(choose_stock))
     # print(f"选中的股票代码：{choose_stock}")
     # 将选中的股票代码写入文件
     # 写入设置utf8编码
 
-    with open(f"D:\\abu\\result\\choose_stock_{end_date}", 'w', encoding="utf-8") as f:
+    with open(f"D:\\abu\\cn\\result\\choose_stock_{end_date}", 'w', encoding="utf-8") as f:
         # f.write("--------------价格和120日均线选股策略\n")
         for item in choose_stock_mean:
             f.write(f"{item}\n")
@@ -249,8 +249,8 @@ def execute_strategy_volume(code, start_date='20230410', end_date='20240410'):
 
 
 def check_choose_stock_change(check_date, get_data_date):
-    file_name = f"D:\\abu\\all\\{get_data_date}"
-    file_name_check = f"D:\\abu\\result\\choose_stock_{check_date}"
+    file_name = f"D:\\abu\\cn\\all\\{get_data_date}"
+    file_name_check = f"D:\\abu\\cn\\result\\choose_stock_{check_date}"
     p_change = []
     stock_data = pd.read_csv(file_name)
     # 读取文件所有内容
@@ -266,7 +266,7 @@ def check_choose_stock_change(check_date, get_data_date):
             # print("code {} : change {}".format(i.strip(), stock_tmp_data['涨跌幅'].iloc[0]))
             p_change.append("code {} : change {}".format(i.strip(), stock_tmp_data['涨跌幅'].iloc[0]))
 
-    with open(f"D:\\abu\\result\\choose_stock_{check_date}_pchange", 'w', encoding="utf-8") as f:
+    with open(f"D:\\abu\\cn\\result\\choose_stock_{check_date}_pchange", 'w', encoding="utf-8") as f:
         # f.write("--------------价格和120日均线选股策略\n")
         for item in p_change:
             f.write(f"{item}\n")
@@ -278,18 +278,18 @@ todo list
 3、选股，1，2,3 可以同时，但是 4  需要单独执行
 """
 if __name__ == '__main__':
-    current_date = 20240416
-    check_date = current_date - 1
-
-    # 1、获取股票的实时行情
-    get_all_latest_stock()
-    # 2、将每个股票的实时行情保存到历史数据，更新多天有问题
-    update_all_stock_data_simple("20230410", "20240416", str(current_date))
-    # 3、对数据进行选股
-    pick_stock(end_date=str(current_date))
+    current_date = 20240424
+    # check_date = current_date - 1
+    #
+    # # 1、获取股票的实时行情
+    # get_all_latest_stock()
+    # # 2、将每个股票的实时行情保存到历史数据，更新多天有问题
+    # update_all_stock_data_simple("20230410", "20240423", str(current_date))
+    # # 3、对数据进行选股
+    # pick_stock(end_date=str(current_date))
 
     # 4、监控昨天选股情况
-    # check_choose_stock_change(20240412, 20240415)
+    # check_choose_stock_change(20240423, 20240424)
 
     # 4、回测股票
 
