@@ -278,18 +278,18 @@ todo list
 3、选股，1，2,3 可以同时，但是 4  需要单独执行
 """
 if __name__ == '__main__':
-    current_date = 20240424
+    # current_date = 20240426
     # check_date = current_date - 1
     #
     # # 1、获取股票的实时行情
     # get_all_latest_stock()
     # # 2、将每个股票的实时行情保存到历史数据，更新多天有问题
-    # update_all_stock_data_simple("20230410", "20240423", str(current_date))
+    # update_all_stock_data_simple("20230410", "20240425", str(current_date))
     # # 3、对数据进行选股
     # pick_stock(end_date=str(current_date))
 
     # 4、监控昨天选股情况
-    # check_choose_stock_change(20240423, 20240424)
+    check_choose_stock_change(20240425, 20240426)
 
     # 4、回测股票
 
