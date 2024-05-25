@@ -5,6 +5,7 @@ import pandas as pd
 import akshare as ak
 from datetime import date
 import os
+import  time
 
 
 # 1. 获取股票的实时行情
@@ -142,7 +143,7 @@ def update_all_stock_data_simple(start_date='20240410', end_date='20240412', all
         file_name = f"D:\\abu\\cn\\stock\\{code}_{start_date}_{all_stock_file_date}"
         stock_data.to_csv(file_name, index=False)
 
-        # 删除文件，不删除文件可以进行每天测试
+        # # 删除文件，不删除文件可以进行每天测试
         file_name = f"D:\\abu\\cn\\stock\\{code}_{start_date}_{end_date}"
         if os.path.exists(file_name):
             os.remove(file_name)
@@ -202,14 +203,14 @@ def execute_strategy_mean(code, start_date='20230410', end_date='20240410'):
         # 计算120日均线
         stock_data['120日均线'] = stock_data['close'].rolling(window=120).mean()
         # 计算120均线最后一个数据
-        last_120 = stock_data['120日均线'].iloc[-1]
+        last_mean = stock_data['120日均线'].iloc[-1]
         last_stock_close = stock_data['close'].iloc[-1]
 
-        yesterday_120 = stock_data['120日均线'].iloc[-2]
-        yesterday_last_stock_close = stock_data['close'].iloc[-2]
+        yesterday_mean = stock_data['120日均线'].iloc[-2]
+        yesterday_stock_close = stock_data['close'].iloc[-2]
 
-        if last_stock_close > last_120 and yesterday_120 > yesterday_last_stock_close:
-            print(f"{code}股票价格{last_stock_close}大于120日均线{last_120}")
+        if last_stock_close > last_mean and yesterday_mean > yesterday_stock_close:
+            print(f"{code}股票价格{last_stock_close}大于120日均线{last_mean}")
             return True
         return False
     except Exception as e:
@@ -278,18 +279,20 @@ todo list
 3、选股，1，2,3 可以同时，但是 4  需要单独执行
 """
 if __name__ == '__main__':
-    # current_date = 20240426
-    # check_date = current_date - 1
-    #
+    start = time.time()
+    current_date = 20240524
+    check_date = current_date - 1
+
     # # 1、获取股票的实时行情
-    # get_all_latest_stock()
-    # # 2、将每个股票的实时行情保存到历史数据，更新多天有问题
-    # update_all_stock_data_simple("20230410", "20240425", str(current_date))
-    # # 3、对数据进行选股
+    get_all_latest_stock()
+    # # 2、将每个股票的实时行情保存到历史数据，更新多天有问题,只更新一天，周一需要单独设置两个时间
+    update_all_stock_data_simple("20230410", str(check_date), str(current_date))
+    # 3、对数据进行选股
     # pick_stock(end_date=str(current_date))
 
     # 4、监控昨天选股情况
-    check_choose_stock_change(20240425, 20240426)
+    # check_choose_stock_change(20240425, 20240426)
 
     # 4、回测股票
+    print("time cost:", time.time() - start)
 
