@@ -6,6 +6,7 @@ import akshare as ak
 from datetime import date
 import os
 import  time
+from util import RegUtil
 
 
 # 1. 获取股票的实时行情
@@ -153,6 +154,9 @@ def pick_stock(start_date='20230410', end_date='20240410'):
     stock_code_data = pd.read_csv('20240409.csv')
     choose_stock_mean = []
     choose_stock_volume = []
+    pick_result_df = pd.DataFrame(columns=['date', 'code', 'price', 'average', 'ang'])
+    # 将 'code' 列的数据类型设置为 'object'
+    pick_result_df['code'] = pick_result_df['code'].astype(str)
 
     # 循环获取
     for i in stock_code_data['代码']:
@@ -161,41 +165,23 @@ def pick_stock(start_date='20230410', end_date='20240410'):
         code = f"{i:06}"
         if code[0] == '8':
             continue
-        result1 = execute_strategy_mean(code, start_date, end_date)
-        if result1:
+        stock_data = get_stock_data_by_name(code, start_date, end_date)
+        result1 = execute_strategy_mean(stock_data, start_date, end_date)
+        result2 = execute_strategy_ang(stock_data, start_date, end_date)
+        if result1 and result2 > 5:
             choose_stock_mean.append(code)
+            pick_result_df.loc[len(pick_result_df)] = [end_date, code, stock_data['close'].iloc[-1], result1, result2]
 
-    # 循环获取
-    # for i in stock_code_data['代码']:
-    #
-    #     # 开头是8的股票代码，不处理
-    #     code = f"{i:06}"
-    #     if code[0] == '8':
-    #         continue
-    #     result2 = execute_strategy_volume(code, start_date, end_date)
-    #     if result2:
-    #         choose_stock_volume.append(code)
-
-    # print("choose stock size:", len(choose_stock))
-    # print(f"选中的股票代码：{choose_stock}")
-    # 将选中的股票代码写入文件
-    # 写入设置utf8编码
-
-    with open(f"D:\\abu\\cn\\result\\choose_stock_{end_date}", 'w', encoding="utf-8") as f:
-        # f.write("--------------价格和120日均线选股策略\n")
-        for item in choose_stock_mean:
-            f.write(f"{item}\n")
-        # f.write("---------------成交量选股策略\n")
-        for item in choose_stock_volume:
-            f.write(f"{item}\n")
+    pick_result_df.to_csv(f"D:\\abu\\cn\\result\\choose_stock_mean_ang.csv", mode='a', header=True, encoding='utf-8', index=False)
 
 
-def execute_strategy_mean(code, start_date='20230410', end_date='20240410'):
+
+def execute_strategy_mean(stock_data, code, start_date='20230410', end_date='20240410'):
     """
     这是一个价格和120日均线的选股策略
     """
     try:
-        stock_data = get_stock_data_by_name(code, start_date, end_date)
+        # stock_data = get_stock_data_by_name(code, start_date, end_date)
 
         if len(stock_data) < 120:
             return False
@@ -248,6 +234,21 @@ def execute_strategy_volume(code, start_date='20230410', end_date='20240410'):
         print(f"获取数据失败，错误信息：{e} {code}")
         return False
 
+def execute_strategy_ang(pd_stock_data, code, start_date='20230410', end_date='20240410'):
+    """
+    这是一个成家量的选股策略
+    """
+    try:
+        # pd_stock_data = get_stock_data_by_name(code, start_date, end_date)
+        if len(pd_stock_data) < 10:
+            return False
+        tmp = pd_stock_data[-10:]
+        ang = RegUtil.calc_regress_deg(tmp['close'], show=False)
+        return ang
+    except Exception as e:
+        print(f"获取数据失败，错误信息：{e} {code}")
+        return 0
+
 
 def check_choose_stock_change(check_date, get_data_date):
     file_name = f"D:\\abu\\cn\\all\\{get_data_date}"
@@ -280,15 +281,16 @@ todo list
 """
 if __name__ == '__main__':
     start = time.time()
-    current_date = 20240524
-    check_date = current_date - 1
-
-    # # 1、获取股票的实时行情
-    get_all_latest_stock()
-    # # 2、将每个股票的实时行情保存到历史数据，更新多天有问题,只更新一天，周一需要单独设置两个时间
-    update_all_stock_data_simple("20230410", str(check_date), str(current_date))
+    current_date = 20240527
+    # 周一减少3天
+    # check_date = current_date - 3
+    #
+    # # # 1、获取股票的实时行情
+    # get_all_latest_stock()
+    # # # 2、将每个股票的实时行情保存到历史数据，更新多天有问题,只更新一天，周一需要单独设置两个时间
+    # update_all_stock_data_simple("20230410", str(check_date), str(current_date))
     # 3、对数据进行选股
-    # pick_stock(end_date=str(current_date))
+    pick_stock(end_date=str(current_date))
 
     # 4、监控昨天选股情况
     # check_choose_stock_change(20240425, 20240426)
