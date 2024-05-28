@@ -281,10 +281,10 @@ todo list
 """
 if __name__ == '__main__':
     start = time.time()
-    current_date = 20240527
+    current_date = 20240528
     # 周一减少3天
-    # check_date = current_date - 3
-    #
+    check_date = current_date - 1
+
     # # # 1、获取股票的实时行情
     # get_all_latest_stock()
     # # # 2、将每个股票的实时行情保存到历史数据，更新多天有问题,只更新一天，周一需要单独设置两个时间

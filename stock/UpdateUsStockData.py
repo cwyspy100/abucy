@@ -6,6 +6,7 @@ import akshare as ak
 from datetime import date
 import os
 import time
+from util import RegUtil
 
 
 # 1. 获取股票的实时行情
@@ -134,10 +135,10 @@ def update_all_stock_data_simple(start_date='20240410', end_date='20240412', all
 
         # 使用concat函数将新数据添加到现有的DataFrame中
         stock_new_data = stock_latest_data[stock_latest_data['代码'] == j]
-        new_data = pd.DataFrame({'date': [save_current_date], 'open': [stock_new_data['今开'].iloc[0]]
+        new_data = pd.DataFrame({'date': [save_current_date], 'open': [stock_new_data['开盘价'].iloc[0]]
                                     , 'close': [stock_new_data['最新价'].iloc[0]],
-                                 'high': [stock_new_data['最高'].iloc[0]]
-                                    , 'low': [stock_new_data['最低'].iloc[0]],
+                                 'high': [stock_new_data['最高价'].iloc[0]]
+                                    , 'low': [stock_new_data['最低价'].iloc[0]],
                                  'volume': [stock_new_data['成交量'].iloc[0]]})
 
         stock_data = pd.concat([stock_data, new_data], ignore_index=True)
@@ -151,34 +152,72 @@ def update_all_stock_data_simple(start_date='20240410', end_date='20240412', all
             os.remove(file_name)
 
 
-def pick_stock(start_date='20230410', end_date='20240410'):
+
+
+def pick_stock_new(start_date='20230410', end_date='20240410'):
     stock_code_data = pd.read_csv('20240424')
     choose_stock_mean = []
     choose_stock_volume = []
+    pick_result_df = pd.DataFrame(columns=['date', 'code', 'price', 'average', 'ang'])
+    # 将 'code' 列的数据类型设置为 'object'
+    pick_result_df['code'] = pick_result_df['code'].astype(str)
 
     # 循环获取
-    for i in stock_code_data['代码']:
+    for code in stock_code_data['代码']:
+        stock_data = get_stock_data_by_name(code, start_date, end_date)
+        result1 = execute_strategy_mean(stock_data, code,  start_date, end_date)
+        result2 = execute_strategy_ang(stock_data, code, start_date, end_date)
+        if result1 and result2 > 0:
+            choose_stock_mean.append(code)
+            pick_result_df.loc[len(pick_result_df)] = [end_date, code, stock_data['close'].iloc[-1], result1, result2]
 
-        # 开头是8的股票代码，不处理
-        result1 = execute_strategy_mean(i, start_date, end_date)
-        if result1:
-            choose_stock_mean.append(i)
-
-    with open(f"D:\\abu\\us\\result\\choose_stock_{end_date}", 'w', encoding="utf-8") as f:
-        # f.write("--------------价格和120日均线选股策略\n")
-        for item in choose_stock_mean:
-            f.write(f"{item}\n")
-        # f.write("---------------成交量选股策略\n")
-        for item in choose_stock_volume:
-            f.write(f"{item}\n")
+    pick_result_df.to_csv(f"D:\\abu\\us\\result\\choose_stock_mean_ang.csv", mode='a', header=True, encoding='utf-8', index=False)
 
 
-def execute_strategy_mean(code, start_date='20230410', end_date='20240423'):
+
+def execute_strategy_ang(pd_stock_data, code, start_date='20230410', end_date='20240410'):
+    """
+    这是一个成家量的选股策略
+    """
+    try:
+        # pd_stock_data = get_stock_data_by_name(code, start_date, end_date)
+        if len(pd_stock_data) < 10:
+            return False
+        tmp = pd_stock_data[-10:]
+        ang = RegUtil.calc_regress_deg(tmp['close'], show=False)
+        return ang
+    except Exception as e:
+        print(f"获取数据失败，错误信息：{e} {code}")
+        return 0
+
+# def pick_stock(start_date='20230410', end_date='20240410'):
+#     stock_code_data = pd.read_csv('20240424')
+#     choose_stock_mean = []
+#     choose_stock_volume = []
+#
+#     # 循环获取
+#     for i in stock_code_data['代码']:
+#
+#         # 开头是8的股票代码，不处理
+#         result1 = execute_strategy_mean(i, start_date, end_date)
+#         if result1:
+#             choose_stock_mean.append(i)
+#
+#     with open(f"D:\\abu\\us\\result\\choose_stock_{end_date}", 'w', encoding="utf-8") as f:
+#         # f.write("--------------价格和120日均线选股策略\n")
+#         for item in choose_stock_mean:
+#             f.write(f"{item}\n")
+#         # f.write("---------------成交量选股策略\n")
+#         for item in choose_stock_volume:
+#             f.write(f"{item}\n")
+
+
+def execute_strategy_mean(stock_data, code, start_date='20230410', end_date='20240423'):
     """
     这是一个价格和120日均线的选股策略
     """
     try:
-        stock_data = get_stock_data_by_name(code, start_date, end_date)
+        # stock_data = get_stock_data_by_name(code, start_date, end_date)
 
         if len(stock_data) < 120:
             return False
@@ -263,15 +302,15 @@ todo list
 """
 if __name__ == '__main__':
     start = time.time()
-    current_date = 20240525 - 1
+    current_date = 20240528
     # check_date = current_date - 1
     #
     # # 1、获取股票的实时行情
-    # get_all_latest_stock()
+    get_all_latest_stock()
     # # 2、将每个股票的实时行情保存到历史数据，更新多天有问题
-    # update_all_stock_data_simple("20230410", "20240524", str(current_date))
+    update_all_stock_data_simple("20230410", "20240527", str(current_date))
     # # 3、对数据进行选股
-    pick_stock(end_date=str(current_date))
+    pick_stock_new(end_date=str(current_date))
 
     # 4、监控昨天选股情况
     # check_choose_stock_change(20240423, 20240424)

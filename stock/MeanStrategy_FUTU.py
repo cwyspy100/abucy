@@ -10,10 +10,10 @@ def get_drawdown(p):
     计算净值回撤
     """
     T = len(p)
-    hmax = [p[0]]
+    hmax = [p.iloc[0]]
     for t in range(1, T):
-        hmax.append(np.nanmax([p[t], hmax[t - 1]]))
-    dd = [p[t] / hmax[t] - 1 for t in range(T)]
+        hmax.append(np.nanmax([p.iloc[t], hmax[t - 1]]))
+    dd = [p.iloc[t] / hmax[t] - 1 for t in range(T)]
 
     return dd
 
@@ -32,7 +32,7 @@ def cal_period_perf_indicator(adjnav):
 
     ret = adjnav.pct_change()
     # annret = np.nanmean(ret) * 242 # 单利
-    annret = (adjnav[-1] / adjnav[0]) ** (242 / len(adjnav)) - 1  # 复利
+    annret = (adjnav.iloc[-1] / adjnav.iloc[0]) ** (242 / len(adjnav)) - 1  # 复利
     annvol = np.nanstd(ret) * np.sqrt(242)
     sr = annret / annvol
     dd = get_drawdown(adjnav)
@@ -71,14 +71,14 @@ def back_test(dfData , N):
     df['hs300_moving_average'] = df['open'].rolling(window=N).mean()
 
     df['wgt_300'] = 0
-    df['wgt_300_cost'] = 0.00003
+    df['wgt_300_cost'] = 0.0049
     for i in range(1, len(df)):
         if i < N:
             continue
         t = df.index[i]
         t0 = df.index[i-1]
         if df.loc[t0, 'open'] >= df.loc[t0, 'hs300_moving_average']:
-            df.loc[t, 'wgt_300'] = 1
+            df.loc[t0, 'wgt_300'] = 1
 
         # if df.loc[t0, 'csi500'] >= df.loc[t0, 'hs500_moving_average']:
         #     df.loc[t, 'wgt_500'] = 1
@@ -93,15 +93,15 @@ def back_test(dfData , N):
 if __name__ == '__main__':
     # index_price = pd.read_csv('date/300和500历史数据.csv').set_index('datetime')
     # index_price.index = [datestr2dtdate(e) for e in index_price.index]
-    index_price = get_stock_data_by_name("105.FUTU", "20230410", "20240423").set_index('date').loc[:, ['open']]
+    index_price = get_stock_data_by_name("105.FUTU", "20230410", "20240524").set_index('date').loc[:, ['open']]
     index_price.index = [datestr2dtdate(e) for e in index_price.index]
 
     # back_test(index_price, 1)
-    back_test(index_price, 5)
-    back_test(index_price, 10)
-    back_test(index_price, 20)
-    back_test(index_price, 30)
-    back_test(index_price, 60)
-    back_test(index_price, 90)
+    # back_test(index_price, 5)
+    # back_test(index_price, 10)
+    # back_test(index_price, 20)
+    # back_test(index_price, 30)
+    # back_test(index_price, 60)
+    # back_test(index_price, 90)
     back_test(index_price, 120)
-    back_test(index_price, 250)
+    # back_test(index_price, 250)
