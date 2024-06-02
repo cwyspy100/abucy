@@ -12,10 +12,10 @@ def get_drawdown(p):
     计算净值回撤
     """
     T = len(p)
-    hmax = [p[0]]
+    hmax = [p.iloc[0]]
     for t in range(1, T):
-        hmax.append(np.nanmax([p[t], hmax[t - 1]]))
-    dd = [p[t] / hmax[t] - 1 for t in range(T)]
+        hmax.append(np.nanmax([p.iloc[t], hmax[t - 1]]))
+    dd = [p.iloc[t] / hmax[t] - 1 for t in range(T)]
 
     return dd
 
@@ -34,7 +34,7 @@ def cal_period_perf_indicator(adjnav):
 
     ret = adjnav.pct_change()
     # annret = np.nanmean(ret) * 242 # 单利
-    annret = (adjnav[-1] / adjnav[0]) ** (242 / len(adjnav)) - 1  # 复利
+    annret = (adjnav.iloc[-1] / adjnav.iloc[0]) ** (242 / len(adjnav)) - 1  # 复利
     annvol = np.nanstd(ret) * np.sqrt(242)
     sr = annret / annvol
     dd = get_drawdown(adjnav)
@@ -51,25 +51,6 @@ def datestr2dtdate(datestr):
     else:
         return datestr
 
-
-# def get_stock_data_by_name(symbol, start_date='20170301', end_date='20240321'):
-#     file_name = symbol+'_'+start_date+'_'+end_date+'.csv'
-#     stock_data = pd.DataFrame()
-#     try:
-#         stock_data = pd.read_csv(file_name)
-#         # 重命名列名
-#         stock_data = stock_data.rename(columns={'日期': 'day', '开盘': 'open', '收盘': 'close', '最高': 'high', '最低': 'low'})
-#     except FileNotFoundError:
-#         print("文件不存在或路径错误。请检查文件路径和文件名。")
-
-#     # 判断stock_data 是空
-#     if stock_data.empty:
-#         stock_data = ak.stock_zh_a_hist(symbol, period='daily', start_date=start_date, end_date=end_date, adjust="" )
-#         stock_data.to_csv(file_name)
-#         stock_data = pd.read_csv(file_name)
-#         stock_data = stock_data.rename(columns={'日期': 'day', '开盘': 'open', '收盘': 'close', '最高': 'high', '最低': 'low'})
-#     # print(stock_data.tail())
-#     return stock_data
 
 def get_stock_data_by_name(symbol, start_date='20170301', end_date='20240321'):
     file_name = f"../data/stock/{symbol}_{start_date}_{end_date}.csv"
@@ -104,7 +85,7 @@ def back_test(dfData, N):
         if i < N:
             continue
         t = df.index[i]
-        t0 = df.index[i]
+        t0 = df.index[i-1]
         if df.loc[t0, 'close'] >= df.loc[t0, 'hs300_moving_average']:
             df.loc[t, 'wgt_300'] = 1
     df['ret_stgy_300'] = df['ret_300'] * df['wgt_300']
@@ -144,7 +125,7 @@ def back_test_open(dfData, N):
         if i < N:
             continue
         t = df.index[i]
-        t0 = df.index[i]
+        t0 = df.index[i-1]
         if df.loc[t0, 'open'] >= df.loc[t0, 'hs300_moving_average']:
             df.loc[t, 'wgt_300'] = 1
     df['ret_stgy_300'] = df['ret_300'] * df['wgt_300']
@@ -180,7 +161,7 @@ def back_test_new(N=5):
 if __name__ == '__main__':
     # back_test_new()
     # back_test_new(10)
-    back_test_new(20)
+    # back_test_new(20)
     # back_test_new(30)
     # back_test_new(60)
     back_test_new(120)
