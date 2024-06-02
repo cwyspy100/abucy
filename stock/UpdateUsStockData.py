@@ -302,13 +302,13 @@ todo list
 """
 if __name__ == '__main__':
     start = time.time()
-    current_date = 20240528
-    # check_date = current_date - 1
+    current_date = 20240531
+    check_date = current_date - 1
     #
     # # 1、获取股票的实时行情
     get_all_latest_stock()
     # # 2、将每个股票的实时行情保存到历史数据，更新多天有问题
-    update_all_stock_data_simple("20230410", "20240527", str(current_date))
+    update_all_stock_data_simple("20230410", str(check_date), str(current_date))
     # # 3、对数据进行选股
     pick_stock_new(end_date=str(current_date))
 
