@@ -4,14 +4,18 @@ import akshare as ak
 import pandas as pd
 import os
 import time
+from util import PathUtil
 
 
 def get_stock_data_by_name(symbol, start_date='20230410', end_date='20240531'):
-    file_name = f"~/abu/cn/stock/{symbol}_{start_date}_{end_date}"
+    file_name = f"abu/cn/stock/{symbol}_{start_date}_{end_date}"
+    # file_name = os.path.join("/Users", "water", "abu", "file.txt")
+    file_path = PathUtil.get_user_path(file_name)
+
     column_names = {'日期': 'date', '开盘': 'open', '收盘': 'close', '最高': 'high', '最低': 'low', '成交量': 'volume'}
 
-    if os.path.exists(file_name):
-        stock_data = pd.read_csv(file_name)
+    if os.path.exists(file_path):
+        stock_data = pd.read_csv(file_path)
         # stock_data.rename(columns=column_names, inplace=True)
         print('get data from file')
     else:
@@ -21,7 +25,7 @@ def get_stock_data_by_name(symbol, start_date='20230410', end_date='20240531'):
             stock_data = ak.stock_zh_a_hist(symbol, period='daily', start_date=start_date, end_date=end_date, adjust="")
             stock_data = stock_data.rename(columns=column_names)
             selected_columns = stock_data.filter(items=column_names.values())
-            selected_columns.to_csv(file_name, index=False)
+            selected_columns.to_csv(file_path, index=False)
         except Exception as e:
             print(f"获取数据失败，错误信息：{e}")
             return pd.DataFrame()
@@ -68,7 +72,7 @@ def pick_stock(start_date='20230410', end_date='20240410'):
     print("choose stock size:", len(choose_stock))
     print(f"选中的股票代码：{choose_stock}")
     # 将选中的股票代码写入文件
-    with open(f"D:\\abu\\result\\choose_stock_{end_date}.txt", 'w') as f:
+    with open(f"~/abu/cn/result/choose_stock_{end_date}.txt", 'w') as f:
         for item in choose_stock:
             f.write(f"{item}\n")
 
@@ -138,7 +142,7 @@ if __name__ == '__main__':
     """
     start_time = time.time()
     # pick_stock(end_date='20240415')
-    get_all_stock_data()
-    # get_stock_data_by_name("600519")
+    # get_all_stock_data()
+    get_stock_data_by_name("301511")
     end_time = time.time()
     print(f"耗时：{end_time - start_time}")
