@@ -168,7 +168,9 @@ def pick_stock(start_date='20230410', end_date='20240410'):
         stock_data = get_stock_data_by_name(code, start_date, end_date)
         result1 = execute_strategy_mean(stock_data, start_date, end_date)
         result2 = execute_strategy_ang(stock_data, start_date, end_date)
-        if result1 and result2 > 0:
+        result3 = execute_strategy_volume(stock_data, code, start_date, end_date)
+        if result1 and result2 > 0 and result3:
+        # if result3:
             choose_stock_mean.append(code)
             pick_result_df.loc[len(pick_result_df)] = [end_date, code, stock_data['close'].iloc[-1], result1, result2]
 
@@ -181,11 +183,8 @@ def execute_strategy_mean(stock_data, code, start_date='20230410', end_date='202
     这是一个价格和120日均线的选股策略
     """
     try:
-        # stock_data = get_stock_data_by_name(code, start_date, end_date)
-
         if len(stock_data) < 120:
             return False
-
         # 计算120日均线
         stock_data['120日均线'] = stock_data['close'].rolling(window=120).mean()
         # 计算120均线最后一个数据
@@ -204,16 +203,13 @@ def execute_strategy_mean(stock_data, code, start_date='20230410', end_date='202
         return False
 
 
-def execute_strategy_volume(code, start_date='20230410', end_date='20240410'):
+def execute_strategy_volume(stock_data, code, start_date='20230410', end_date='20240410'):
     """
     这是一个成家量的选股策略
     """
     try:
-        stock_data = get_stock_data_by_name(code, start_date, end_date)
-
-        if len(stock_data) < 120:
+        if stock_data is None:
             return False
-
         last_stock_volume = stock_data['volume'].iloc[-1]
         yesterday_1 = stock_data['volume'].iloc[-2]
         yesterday_2 = stock_data['volume'].iloc[-3]
@@ -221,17 +217,12 @@ def execute_strategy_volume(code, start_date='20230410', end_date='20240410'):
         yesterday_stock_volume = (yesterday_1 + yesterday_2 + yesterday_3) / 3
 
         # 价格筛选
-        stock_data['120日均线'] = stock_data['close'].rolling(window=120).mean()
-        # 计算120均线最后一个数据
-        last_120 = stock_data['120日均线'].iloc[-1]
-        last_stock_close = stock_data['close'].iloc[-1]
-
-        if last_stock_volume > yesterday_stock_volume * 3 and last_stock_volume > yesterday_1 * 3 and last_stock_close > last_120:
-            print(f"{code}股票价格{last_stock_close}大于120日成交量的3倍{yesterday_stock_volume * 3}")
+        if last_stock_volume > yesterday_stock_volume * 3 and last_stock_volume > yesterday_1 * 3:
+            print(f"{code}股票价格{last_stock_volume}大于120日成交量的3倍{yesterday_stock_volume * 3}")
             return True
         return False
     except Exception as e:
-        print(f"获取数据失败，错误信息：{e} {code}")
+        # print(f"获取数据失败，错误信息：{e} {code}")
         return False
 
 def execute_strategy_ang(pd_stock_data, code, start_date='20230410', end_date='20240410'):
@@ -239,7 +230,6 @@ def execute_strategy_ang(pd_stock_data, code, start_date='20230410', end_date='2
     这是一个成家量的选股策略
     """
     try:
-        # pd_stock_data = get_stock_data_by_name(code, start_date, end_date)
         if len(pd_stock_data) < 10:
             return False
         tmp = pd_stock_data[-10:]
@@ -281,14 +271,14 @@ todo list
 """
 if __name__ == '__main__':
     start = time.time()
-    current_date = 20240531
-    # 周一减少3天
-    check_date = current_date - 1
-
-    # # # 1、获取股票的实时行情
-    get_all_latest_stock()
-    # # # 2、将每个股票的实时行情保存到历史数据，更新多天有问题,只更新一天，周一需要单独设置两个时间
-    update_all_stock_data_simple("20230410", str(check_date), str(current_date))
+    current_date = 20240604
+    # # 周一减少3天
+    # check_date = 20240531
+    #
+    # # # # 1、获取股票的实时行情
+    # get_all_latest_stock()
+    # # # # 2、将每个股票的实时行情保存到历史数据，更新多天有问题,只更新一天，周一需要单独设置两个时间
+    # update_all_stock_data_simple("20230410", str(check_date), str(current_date))
     # 3、对数据进行选股
     pick_stock(end_date=str(current_date))
 

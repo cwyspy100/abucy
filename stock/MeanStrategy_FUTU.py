@@ -71,7 +71,7 @@ def back_test(dfData , N):
     df['hs300_moving_average'] = df['open'].rolling(window=N).mean()
 
     df['wgt_300'] = 0
-    df['wgt_300_cost'] = 0.009
+    df['wgt_300_cost'] = 0.01
     for i in range(1, len(df)):
         if i < N:
             continue
@@ -93,17 +93,17 @@ def back_test(dfData , N):
 if __name__ == '__main__':
     # index_price = pd.read_csv('date/300和500历史数据.csv').set_index('datetime')
     # index_price.index = [datestr2dtdate(e) for e in index_price.index]
-    index_price = get_stock_data_by_name("105.FUTU", "20230410", "20240528").set_index('date').loc[:, ['open']]
+    index_price = get_stock_data_by_name("105.FUTU", "20230410", "20240530").set_index('date').loc[:, ['open']]
     # index_price = get_stock_data_by_name("105.GOOG", "20230410", "20240528").set_index('date').loc[:, ['open']]
     # index_price = get_stock_data_by_name("106.BABA", "20230410", "20240528").set_index('date').loc[:, ['open']]
     index_price.index = [datestr2dtdate(e) for e in index_price.index]
 
     # back_test(index_price, 1)
     back_test(index_price, 5)
-    back_test(index_price, 10)
-    back_test(index_price, 20)
-    back_test(index_price, 30)
-    back_test(index_price, 60)
-    back_test(index_price, 90)
-    back_test(index_price, 120)
-    back_test(index_price, 250)
+    # back_test(index_price, 10)
+    # back_test(index_price, 20)
+    # back_test(index_price, 30)
+    # back_test(index_price, 60)
+    # back_test(index_price, 90)
+    # back_test(index_price, 120)
+    # back_test(index_price, 250)
