@@ -174,8 +174,28 @@ def pick_stock_new(start_date='20230410', end_date='20240410'):
     pick_result_df.to_csv(f"D:\\abu\\us\\result\\choose_stock_mean_ang.csv", mode='a', header=True, encoding='utf-8', index=False)
 
 
+def pick_stock_2(start_date='20230410', end_date='20240410'):
+    stock_code_data = pd.read_csv('20240424')
+    choose_stock_mean = []
+    choose_stock_volume = []
+    pick_result_df = pd.DataFrame(columns=['date', 'code', 'price', 'average', 'ang'])
+    # 将 'code' 列的数据类型设置为 'object'
+    pick_result_df['code'] = pick_result_df['code'].astype(str)
 
-def execute_strategy_ang(pd_stock_data, code, start_date='20230410', end_date='20240410'):
+    # 循环获取
+    for code in stock_code_data['代码']:
+        stock_data = get_stock_data_by_name(code, start_date, end_date)
+        result1 = execute_strategy_ang_new(stock_data, code)
+        result2 = execute_strategy_ang(stock_data, code)
+        if result1 > 1  and result2 > 1:
+            choose_stock_mean.append(code)
+            pick_result_df.loc[len(pick_result_df)] = [end_date, code, stock_data['close'].iloc[-1], result1, result2]
+
+    pick_result_df.to_csv(f"D:\\abu\\us\\result\\choose_stock_ang.csv", mode='a', header=True, encoding='utf-8', index=False)
+
+
+
+def execute_strategy_ang(pd_stock_data, code):
     """
     这是一个成家量的选股策略
     """
@@ -183,8 +203,23 @@ def execute_strategy_ang(pd_stock_data, code, start_date='20230410', end_date='2
         # pd_stock_data = get_stock_data_by_name(code, start_date, end_date)
         if len(pd_stock_data) < 10:
             return False
-        tmp = pd_stock_data[-10:]
+        tmp = pd_stock_data[-60:]
         ang = RegUtil.calc_regress_deg(tmp['close'], show=False)
+        return ang
+    except Exception as e:
+        print(f"获取数据失败，错误信息：{e} {code}")
+        return 0
+
+def execute_strategy_ang_new(pd_stock_data, code):
+    """
+    这是一个成家量的选股策略
+    """
+    try:
+        # pd_stock_data = get_stock_data_by_name(code, start_date, end_date)
+        if len(pd_stock_data) < 10:
+            return False
+        tmp = pd_stock_data[-60:]
+        ang = RegUtil.calc_regress_deg(tmp['volume'], show=False)
         return ang
     except Exception as e:
         print(f"获取数据失败，错误信息：{e} {code}")
@@ -231,7 +266,7 @@ def execute_strategy_mean(stock_data, code, start_date='20230410', end_date='202
         yesterday_120 = stock_data['120日均线'].iloc[-2]
         yesterday_last_stock_close = stock_data['close'].iloc[-2]
 
-        if last_stock_close > last_120 and yesterday_120 > yesterday_last_stock_close and last_120 > 5:
+        if last_stock_close > last_120 and yesterday_120 > yesterday_last_stock_close:
             print(f"{code}股票价格{last_stock_close}大于120日均线{last_120}")
             return True
         return False
@@ -302,15 +337,15 @@ todo list
 """
 if __name__ == '__main__':
     start = time.time()
-    current_date = 20240531
+    current_date = 20240530
     check_date = current_date - 1
     #
-    # # 1、获取股票的实时行情
-    get_all_latest_stock()
-    # # 2、将每个股票的实时行情保存到历史数据，更新多天有问题
-    update_all_stock_data_simple("20230410", str(check_date), str(current_date))
+    # # # 1、获取股票的实时行情
+    # get_all_latest_stock()
+    # # # 2、将每个股票的实时行情保存到历史数据，更新多天有问题
+    # update_all_stock_data_simple("20230410", str(check_date), str(current_date))
     # # 3、对数据进行选股
-    pick_stock_new(end_date=str(current_date))
+    pick_stock_2(end_date=str(current_date))
 
     # 4、监控昨天选股情况
     # check_choose_stock_change(20240423, 20240424)
