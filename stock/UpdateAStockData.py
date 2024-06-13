@@ -14,13 +14,13 @@ def get_all_latest_stock():
     current_date = date.today()
     current_date = current_date.strftime('%Y%m%d')
     file_name = f"D:\\abu\\cn\\all\\{current_date}"
-    if os.path.exists(file_name):
-        stock_data = pd.read_csv(file_name)
-        # stock_data.rename(columns=column_names, inplace=True)
-        print('get data from file')
-    else:
-        stock_data = ak.stock_zh_a_spot_em()
-        stock_data.to_csv(file_name, index=False)
+    # if os.path.exists(file_name):
+    #     stock_data = pd.read_csv(file_name)
+    #     # stock_data.rename(columns=column_names, inplace=True)
+    #     print('get data from file')
+    # else:
+    stock_data = ak.stock_zh_a_spot_em()
+    stock_data.to_csv(file_name, index=False)
     return stock_data
 
 
@@ -52,78 +52,29 @@ def get_stock_data_by_name(symbol, start_date='20230410', end_date='20240410'):
         return None
 
 
-# 2. 将每个股票的实时行情保存到历史数据
-def update_all_stock_data(start_date=20240410, end_date=20240412, single_end_data=20240412):
-    """
-    使用最新的实时数据来更新历史数据
-    0、更新之前先备份一下数据
-    1、start_date end_date 是全部最新数据文件
-    2、更新获取最新数据
-
-    """
-    # start_date = 20240410
-    # end_date = 20240412
-
-    # 循环start_date到end_date
-    cur_start_date = '20230410'
-    for i in range(start_date, end_date):
-        current_date = str(i + 1)
-        stock_latest_data = pick_stock_by_date(current_date)
-        if stock_latest_data is None:
-            continue
-
-        # 将20240410 变为 2024-04-10
-        save_current_date = f"{current_date[:4]}-{current_date[4:6]}-{current_date[6:]}"
-        for j in stock_latest_data['代码']:
-            # 开头是8的股票代码，不处理
-            code = f"{j:06}"
-            if code[0] == '8':
-                continue
-
-            end = single_end_data
-            if single_end_data > start_date:
-                end = start_date
-
-            stock_data = get_stock_data_by_name(code, cur_start_date, str(end))
-            if stock_data is None or stock_data.size == 0:
-                continue
-
-            # 使用concat函数将新数据添加到现有的DataFrame中
-            stock_new_data = stock_latest_data[stock_latest_data['代码'] == j]
-            new_data = pd.DataFrame({'date': [save_current_date], 'open': [stock_new_data['今开'].iloc[0]]
-                                        , 'close': [stock_new_data['最新价'].iloc[0]],
-                                     'high': [stock_new_data['最高'].iloc[0]]
-                                        , 'low': [stock_new_data['最低'].iloc[0]],
-                                     'volume': [stock_new_data['成交量'].iloc[0]]})
-
-            stock_data = pd.concat([stock_data, new_data], ignore_index=True)
-
-            file_name = f"D:\\abu\\cn\\stock\\{code}_{cur_start_date}_{current_date}"
-            stock_data.to_csv(file_name, index=False)
-
-            # 删除文件，不删除文件可以进行每天测试
-            # file_name = f"D:\\abu\\stock\\{code}_{cur_start_date}_{start_date}"
-            # if os.path.exists(file_name):
-            #     os.remove(file_name)
-        start_date = i + 1
-
-
 def update_all_stock_data_simple(start_date='20240410', end_date='20240412', all_stock_file_date='20240415'):
     """
     使用最新的实时数据来更新历史数据，只更新一天
     start_date :end_date 是股票单个数据的时间
     all_stock_file_date 是全部最新数据文件的时间
+    当更新当天数据的时候end_date 和all_stock_file_date 相同
 
     """
-    stock_latest_data = pick_stock_by_date(all_stock_file_date)
+    stock_latest_data = None
+    if end_date == all_stock_file_date:
+        stock_latest_data = get_all_latest_stock()
+    else:
+        stock_latest_data = pick_stock_by_date(all_stock_file_date)
     if stock_latest_data is None:
         return
 
     # 将20240410 变为 2024-04-10
     save_current_date = f"{all_stock_file_date[:4]}-{all_stock_file_date[4:6]}-{all_stock_file_date[6:]}"
-    for j in stock_latest_data['代码']:
+    end_date_str = f"{end_date[:4]}-{end_date[4:6]}-{end_date[6:]}"
+    # end_date_str = "2024-06-11"
+    for code in stock_latest_data['代码']:
         # 开头是8的股票代码，不处理
-        code = f"{j:06}"
+        # code = f"{j:06}"
         if code[0] == '8':
             continue
 
@@ -131,15 +82,21 @@ def update_all_stock_data_simple(start_date='20240410', end_date='20240412', all
         if stock_data is None or stock_data.size == 0:
             continue
 
-        # 使用concat函数将新数据添加到现有的DataFrame中
-        stock_new_data = stock_latest_data[stock_latest_data['代码'] == j]
+        stock_new_data = stock_latest_data[stock_latest_data['代码'] == code]
         new_data = pd.DataFrame({'date': [save_current_date], 'open': [stock_new_data['今开'].iloc[0]]
                                     , 'close': [stock_new_data['最新价'].iloc[0]],
                                  'high': [stock_new_data['最高'].iloc[0]]
                                     , 'low': [stock_new_data['最低'].iloc[0]],
                                  'volume': [stock_new_data['成交量'].iloc[0]]})
-
-        stock_data = pd.concat([stock_data, new_data], ignore_index=True)
+        if end_date_str not in stock_data['date'].values:
+            # 使用concat函数将新数据添加到现有的DataFrame中
+            stock_data = pd.concat([stock_data, new_data], ignore_index=True)
+        else:
+            stock_data.loc[stock_data['date'] == end_date_str, 'open'] = new_data['open'].iloc[0]
+            stock_data.loc[stock_data['date'] == end_date_str, 'close'] = new_data['close'].iloc[0]
+            stock_data.loc[stock_data['date'] == end_date_str, 'high'] = new_data['high'].iloc[0]
+            stock_data.loc[stock_data['date'] == end_date_str, 'low'] = new_data['low'].iloc[0]
+            stock_data.loc[stock_data['date'] == end_date_str, 'volume'] = new_data['volume'].iloc[0]
 
         file_name = f"D:\\abu\\cn\\stock\\{code}_{start_date}_{all_stock_file_date}"
         stock_data.to_csv(file_name, index=False)
@@ -150,8 +107,8 @@ def update_all_stock_data_simple(start_date='20240410', end_date='20240412', all
             os.remove(file_name)
 
 
-def pick_stock(start_date='20230410', end_date='20240410'):
-    stock_code_data = pd.read_csv('20240409.csv')
+def pick_stock(stock_code_data, start_date='20230410', end_date='20240410'):
+    # stock_code_data = pd.read_csv('20240409.csv')
     choose_stock_mean = []
     choose_stock_volume = []
     pick_result_df = pd.DataFrame(columns=['date', 'code', 'price', 'average', 'ang'])
@@ -159,45 +116,58 @@ def pick_stock(start_date='20230410', end_date='20240410'):
     pick_result_df['code'] = pick_result_df['code'].astype(str)
 
     # 循环获取
-    for i in stock_code_data['代码']:
-
+    for index, row in stock_code_data.iterrows():
+        # print(row)
         # 开头是8的股票代码，不处理
-        code = f"{i:06}"
+        code = row['代码']
         if code[0] == '8':
             continue
+        price = row['最新价']
+        if price < 2 and price > 500:
+            print("code {} price {} continue ".format(code, price))
+            continue
+
         stock_data = get_stock_data_by_name(code, start_date, end_date)
         result1 = execute_strategy_mean(stock_data, code)
-        result2 = execute_strategy_ang(stock_data, 10, 'close')
-        # result3 = execute_strategy_volume(stock_data, code, start_date, end_date)
-        if result1 and result2 > 0:
-        # if result3:
+        result2 = execute_strategy_ang(stock_data, code, 10, 'close')
+        if result1 and result2 > 3:
             choose_stock_mean.append(code)
             pick_result_df.loc[len(pick_result_df)] = [end_date, code, stock_data['close'].iloc[-1], result1, result2]
 
-    pick_result_df.to_csv(f"D:\\abu\\cn\\result\\choose_stock_mean_ang.csv", mode='a', header=True, encoding='utf-8', index=False)
+    pick_result_df.to_csv(f"D:\\abu\\cn\\result\\choose_a_stock.csv", mode='a', header=True, encoding='utf-8', index=False)
 
-def pick_stock_new(start_date='20230410', end_date='20240410'):
-    stock_code_data = pd.read_csv('20240409.csv')
+
+"""
+
+num ：跨度的天数
+"""
+def pick_stock_ang(stock_code_data, num=10, start_date='20230410', end_date='20240410'):
+    # stock_code_data = pd.read_csv('20240409.csv')
     choose_stock_mean = []
-    pick_result_df = pd.DataFrame(columns=['date', 'code', 'price', 'volumeang', 'closeang', 'rate'])
+    choose_stock_volume = []
+    pick_result_df = pd.DataFrame(columns=['date', 'code', 'price', 'volumeAng', 'priceAng', 'radio'])
     # 将 'code' 列的数据类型设置为 'object'
     pick_result_df['code'] = pick_result_df['code'].astype(str)
 
     # 循环获取
-    for i in stock_code_data['代码']:
-
-        # 开头是8的股票代码，不处理
-        code = f"{i:06}"
+    for index, row in stock_code_data.iterrows():
+        code = row['代码']
         if code[0] == '8':
             continue
+        price = row['最新价']
+        if price < 2 and price > 500:
+            print("code {} price {} continue ".format(code, price))
+            continue
         stock_data = get_stock_data_by_name(code, start_date, end_date)
-        result1 = execute_strategy_ang(stock_data, 10, 'volume')
-        result2 = execute_strategy_ang(stock_data, 10, 'close')
+        result1 = execute_strategy_ang(stock_data, num, 'volume')
+        result2 = execute_strategy_ang(stock_data, num, 'close')
         if result1 > 5 and result2 > 5:
             choose_stock_mean.append(code)
             pick_result_df.loc[len(pick_result_df)] = [end_date, code, stock_data['close'].iloc[-1], result1, result2, result1/result2]
 
-    pick_result_df.to_csv(f"D:\\abu\\cn\\result\\choose_stock_ang.csv", mode='a', header=True, encoding='utf-8', index=False)
+    pick_result_df.to_csv(f"D:\\abu\\cn\\result\\choose_a_stock_ang.csv", mode='w', header=True, encoding='utf-8',
+                          index=False)
+
 
 def execute_strategy_mean(stock_data, code):
     """
@@ -271,6 +241,41 @@ def test_ang(symbol, start_date='20230410', end_date='20240410'):
     print(ang)
 
 
+def check_choose_stock_change(get_data_date):
+    stock_latest_data = pick_stock_by_date(get_data_date)
+    if stock_latest_data is None:
+        print("当前数据是空，请确认")
+        return
+    check_path = f"D:\\abu\\cn\\result\\choose_a_stock_ang.csv"
+    check_pd = pd.read_csv(check_path)
+    if check_pd is None:
+        print("确认数据是空，请确认")
+        return
+    # 初始化第一天的价格变化为0
+    check_pd['latest_price'] = 0.0
+    check_pd['p_change'] = 0.0
+
+    # check_pd['code'] = check_pd['code'].str.replace('"', '')
+    for code in check_pd['code']:
+        if code == 'code':
+            continue
+        # 从stock_prices数据框中获取该股票的最新价格
+        latest_price = stock_latest_data.loc[stock_latest_data['代码'] == code, '最新价'].values[0]
+
+        # 从stock_history数据框中获取该股票的历史价格
+        historical_price = float(check_pd.loc[check_pd['code'] == code, 'price'].values[0])
+
+        # 计算价格变化率
+        price_change = round((latest_price - historical_price) / historical_price * 100, 2)
+
+        check_pd.loc[check_pd['code'] == code, 'latest_price'] = latest_price
+        check_pd.loc[check_pd['code'] == code, 'p_change'] = price_change
+
+    check_pd.to_csv(f"D:\\abu\\cn\\result\\choose_a_stock_ang.csv"
+                    , mode='w', header=True, encoding='utf-8',
+                    index=False)
+
+
 """
 todo list
 1、获取20240416的数据 get_all_latest_stock()
@@ -281,20 +286,16 @@ if __name__ == '__main__':
     start = time.time()
     current_date = 20240613
     # # 周一减少3天
-    check_date = current_date - 1
-    #
-    # # 1、获取股票的实时行情
-    # get_all_latest_stock()
-    # # # # # # 2、将每个股票的实时行情保存到历史数据，更新多天有问题,只更新一天，周一需要单独设置两个时间
+    check_date = current_date
+    # 最新的数据
+    stock_data = get_all_latest_stock()
+    # # # 1、将每个股票的实时行情保存到历史数据，更新多天有问题,只更新一天，周一需要单独设置两个时间
     # update_all_stock_data_simple("20230410", str(check_date), str(current_date))
-    # # 3、对数据进行选股
-    pick_stock(end_date=str(current_date))
-    pick_stock_new(end_date=str(current_date))
-
-    # 4、监控昨天选股情况
-    # check_choose_stock_change(20240425, 20240426)
-
-    test_ang('301176', end_date=str(current_date))
+    # # 2、对数据进行选股
+    # pick_stock(stock_data, end_date=str(current_date))
+    pick_stock_ang(stock_data, 20, end_date=str(current_date))
+    # # 3、监控昨天选股情况
+    # check_choose_stock_change(current_date)
 
     # 4、回测股票
     print("time cost:", time.time() - start)
