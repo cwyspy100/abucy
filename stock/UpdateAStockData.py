@@ -102,10 +102,11 @@ def update_all_stock_data_simple(start_date='20240410', end_date='20240412', all
         file_name = f"D:\\abu\\cn\\stock\\{code}_{start_date}_{all_stock_file_date}"
         stock_data.to_csv(file_name, index=False)
 
-        # # 删除文件，不删除文件可以进行每天测试
-        file_name = f"D:\\abu\\cn\\stock\\{code}_{start_date}_{end_date}"
-        if os.path.exists(file_name):
-            os.remove(file_name)
+        if (all_stock_file_date != end_date):
+            # # 删除文件，不删除文件可以进行每天测试
+            file_name = f"D:\\abu\\cn\\stock\\{code}_{start_date}_{end_date}"
+            if os.path.exists(file_name):
+                os.remove(file_name)
 
 
 def pick_stock(stock_code_data, start_date='20230410', end_date='20240410'):
@@ -290,18 +291,18 @@ todo list
 """
 if __name__ == '__main__':
     start = time.time()
-    current_date = 20240614
+    current_date = 20240618
     # # 周一减少3天
-    check_date = current_date - 1
+    check_date = current_date
     # 最新的数据
     stock_data = get_all_latest_stock()
     # 1、将每个股票的实时行情保存到历史数据，更新多天有问题,只更新一天，周一需要单独设置两个时间
-    # update_all_stock_data_simple("20230410", str(check_date), str(current_date))
+    update_all_stock_data_simple("20230410", str(check_date), str(current_date))
     # 2、对数据进行选股
-    # pick_stock(stock_data, end_date=str(current_date))
-    # pick_stock_ang(stock_data, 20, end_date=str(current_date))
+    pick_stock(stock_data, end_date=str(current_date))
+    pick_stock_ang(stock_data, 20, end_date=str(current_date))
     # 3、监控昨天选股情况
-    # check_choose_stock_change(current_date)
+    check_choose_stock_change(current_date)
 
     # 4、回测股票
     print("time cost:", time.time() - start)
