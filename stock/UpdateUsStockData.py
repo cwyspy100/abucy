@@ -115,14 +115,14 @@ def pick_stock(stock_code_data, start_date='20230410', end_date='20240410'):
             choose_stock_mean.append(code)
             pick_result_df.loc[len(pick_result_df)] = [end_date, code, stock_data['close'].iloc[-1], result1, result2]
 
-    pick_result_df.to_csv(f"D:\\abu\\us\\result\\choose_us_stock.csv", mode='a', header=True, encoding='utf-8', index=False)
+    pick_result_df.to_csv(f"D:\\abu\\us\\result\\choose_us_stock.csv", mode='a', header=False, encoding='utf-8', index=False)
 
 
 def pick_stock_ang(stock_code_data, start_date='20230410', end_date='20240410'):
     # stock_code_data = pd.read_csv('20240424')
     choose_stock_mean = []
     choose_stock_volume = []
-    pick_result_df = pd.DataFrame(columns=['date', 'code', 'price', 'average', 'ang'])
+    pick_result_df = pd.DataFrame(columns=['date', 'code', 'price', 'volumeang', 'priceang'])
     # 将 'code' 列的数据类型设置为 'object'
     pick_result_df['code'] = pick_result_df['code'].astype(str)
 
@@ -138,7 +138,7 @@ def pick_stock_ang(stock_code_data, start_date='20230410', end_date='20240410'):
             choose_stock_mean.append(code)
             pick_result_df.loc[len(pick_result_df)] = [end_date, code, stock_data['close'].iloc[-1], result1, result2]
 
-    pick_result_df.to_csv(f"D:\\abu\\us\\result\\choose_us_stock_ang.csv", mode='w', header=True, encoding='utf-8', index=False)
+    pick_result_df.to_csv(f"D:\\abu\\us\\result\\choose_us_stock_ang.csv", mode='a', header=True, encoding='utf-8', index=False)
 
 
 
@@ -215,28 +215,42 @@ def execute_strategy_volume(code, start_date='20230410', end_date='20240410'):
         return False
 
 
-def check_choose_stock_change(check_date, get_data_date):
-    file_name = f"D:\\abu\\us\\all\\{get_data_date}"
-    file_name_check = f"D:\\abu\\us\\result\\choose_stock_{check_date}"
-    p_change = []
-    stock_data = pd.read_csv(file_name)
-    # 读取文件所有内容
-    with open(file_name_check, 'r', encoding="utf-8") as f:
-        # 读取文件所有内容
-        # print(f.readlines())
-        # print(type(f.readlines()))
-        for i in f.readlines():
-            # print(i.strip())
-            # 从stock_data中找到对应的股票代码的涨跌幅
-            stock_tmp_data = stock_data[stock_data['代码'] == int(i.strip())]
-            # 获取涨跌幅的值
-            # print("code {} : change {}".format(i.strip(), stock_tmp_data['涨跌幅'].iloc[0]))
-            p_change.append("code {} : change {}".format(i.strip(), stock_tmp_data['涨跌幅'].iloc[0]))
 
-    with open(f"D:\\abu\\us\\result\\choose_stock_{check_date}_pchange", 'w', encoding="utf-8") as f:
-        # f.write("--------------价格和120日均线选股策略\n")
-        for item in p_change:
-            f.write(f"{item}\n")
+def check_choose_stock_change(get_data_date):
+    stock_latest_data = pick_stock_by_date(get_data_date)
+    if stock_latest_data is None:
+        print("当前数据是空，请确认")
+        return
+    check_path = f"D:\\abu\\us\\result\\choose_us_stock.csv"
+    check_pd = pd.read_csv(check_path)
+    if check_pd is None:
+        print("确认数据是空，请确认")
+        return
+    # 初始化第一天的价格变化为0
+    check_pd['latest_price'] = 0.0
+    check_pd['p_change'] = 0.0
+
+    # check_pd['code'] = check_pd['code'].str.replace('"', '')
+    for j in check_pd['code']:
+        # 从stock_prices数据框中获取该股票的最新价格
+
+        if j == 'code':
+            continue
+        latest_data = stock_latest_data.loc[stock_latest_data['代码'] == j]
+        latest_price = latest_data ['最新价'].values[0]
+
+        # 从stock_history数据框中获取该股票的历史价格
+        historical_price = float(check_pd.loc[check_pd['code'] == j, 'price'].values[0])
+
+        # 计算价格变化率
+        price_change = round((latest_price - historical_price) / historical_price * 100, 2)
+
+        check_pd.loc[check_pd['code'] == j, 'latest_price'] = latest_price
+        check_pd.loc[check_pd['code'] == j, 'p_change'] = price_change
+
+    check_pd.to_csv(f"D:\\abu\\us\\result\\choose_us_stock.csv"
+                    , mode='w', header=True, encoding='utf-8',
+                    index=False)
 
 """
 todo list
@@ -246,19 +260,19 @@ todo list
 """
 if __name__ == '__main__':
     start = time.time()
-    current_date = 20240617
-    check_date = current_date - 4
+    current_date = 20240618
+    check_date = current_date - 1
     #
     # # # 1、获取股票的实时行情
     stock_data = get_all_latest_stock()
-    # # # 2、将每个股票的实时行情保存到历史数据，更新多天有问题
-    update_all_stock_data_simple("20230410", str(check_date), str(current_date))
-    # # 3、对数据进行选股
-    pick_stock(stock_data, end_date=str(current_date))
+    # # # # # 2、将每个股票的实时行情保存到历史数据，更新多天有问题
+    # update_all_stock_data_simple("20230410", str(check_date), str(current_date))
+    # # # # # 3、对数据进行选股
+    # pick_stock(stock_data, end_date=str(current_date))
     pick_stock_ang(stock_data, end_date=str(current_date))
 
     # 4、监控昨天选股情况
-    # check_choose_stock_change(20240423, 20240424)
+    check_choose_stock_change(20240618)
 
     # 4、回测股票
     print("time cost:", time.time() - start)

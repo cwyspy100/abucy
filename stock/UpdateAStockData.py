@@ -282,6 +282,22 @@ def check_choose_stock_change(get_data_date):
                     , mode='w', header=True, encoding='utf-8',
                     index=False)
 
+def check_code_mean_ang(symbol, start_date, end_date , set_start, set_end ):
+    """
+    测试当时选择是否正确
+    set_start,set_end 设定时间范围
+    """
+    pd_stock_data = get_stock_data_by_name(symbol, start_date, end_date)
+    if pd_stock_data is None:
+        return
+
+    stock_data = pd_stock_data.loc[(pd_stock_data['date'] >= set_start) & (pd_stock_data['date'] <= set_end)]
+    result1 = execute_strategy_mean(stock_data, symbol)
+    result2 = execute_strategy_ang(stock_data, 10, 'close')
+    print("mean :{} ang {}".format(result1, result2))
+
+
+
 
 """
 todo list
@@ -291,18 +307,20 @@ todo list
 """
 if __name__ == '__main__':
     start = time.time()
-    current_date = 20240618
+    current_date = 20240619
     # # 周一减少3天
     check_date = current_date
-    # 最新的数据
+    # # 最新的数据
     stock_data = get_all_latest_stock()
-    # 1、将每个股票的实时行情保存到历史数据，更新多天有问题,只更新一天，周一需要单独设置两个时间
-    update_all_stock_data_simple("20230410", str(check_date), str(current_date))
-    # 2、对数据进行选股
+    # # 1、将每个股票的实时行情保存到历史数据，更新多天有问题,只更新一天，周一需要单独设置两个时间
+    # update_all_stock_data_simple("20230410", str(check_date), str(current_date))
+    # # 2、对数据进行选股
     pick_stock(stock_data, end_date=str(current_date))
     pick_stock_ang(stock_data, 20, end_date=str(current_date))
-    # 3、监控昨天选股情况
+    # # 3、监控昨天选股情况
     check_choose_stock_change(current_date)
+
+    # check_code_mean_ang('300956', '20230410', '20240619','2023-01-01', '2024-05-21')
 
     # 4、回测股票
     print("time cost:", time.time() - start)
