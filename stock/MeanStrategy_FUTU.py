@@ -47,7 +47,7 @@ def datestr2dtdate(datestr):
     return datetime.datetime.strptime(datestr, '%Y-%m-%d').date()
 
 
-def get_stock_data_by_name(symbol, start_date='20230410', end_date='20240410'):
+def get_stock_data_by_name(symbol, start_date='20190627', end_date='20240827'):
     file_name = f"D:\\abu\\us\\stock\\{symbol}_{start_date}_{end_date}"
     column_names = {'日期': 'date', '开盘': 'open', '收盘': 'close', '最高': 'high', '最低': 'low', '成交量': 'volume'}
 
@@ -93,7 +93,7 @@ def back_test(dfData , N):
 if __name__ == '__main__':
     # index_price = pd.read_csv('date/300和500历史数据.csv').set_index('datetime')
     # index_price.index = [datestr2dtdate(e) for e in index_price.index]
-    index_price = get_stock_data_by_name("105.FUTU", "20230410", "20240528").set_index('date').loc[:, ['open']]
+    index_price = get_stock_data_by_name("105.FUTU", "20190627", "20240827").set_index('date').loc[:, ['open']]
     # index_price = get_stock_data_by_name("105.GOOG", "20230410", "20240528").set_index('date').loc[:, ['open']]
     # index_price = get_stock_data_by_name("106.BABA", "20230410", "20240528").set_index('date').loc[:, ['open']]
     index_price.index = [datestr2dtdate(e) for e in index_price.index]

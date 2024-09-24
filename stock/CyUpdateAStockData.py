@@ -177,7 +177,7 @@ def pick_stock_ang(stock_code_data, num=10, start_date='20230410', end_date='202
             choose_stock_mean.append(code)
             pick_result_df.loc[len(pick_result_df)] = [end_date, code, stock_data['close'].iloc[-1], result1, result2, result1/result2]
 
-    pick_result_df.to_csv(f"../todolist/choose_a_stock_ang.csv", mode='a', header=False, encoding='utf-8',
+    pick_result_df.to_csv(f"../todolist/choose_a_stock_ang.csv", mode='w', header=True, encoding='utf-8',
                           index=False)
 
 
@@ -287,7 +287,7 @@ def check_choose_stock_change(get_data_date):
         check_pd.loc[check_pd['code'] == code, 'latest_price'] = latest_price
         check_pd.loc[check_pd['code'] == code, 'p_change'] = price_change
 
-    check_pd.to_csv(f"../todolist/choose_a_stock.csv", mode='w', header=True, encoding='utf-8',
+    check_pd.to_csv(f"../todolist/choose_a_stock.csv", mode='w', header=False, encoding='utf-8',
                     index=False)
 
 
@@ -299,18 +299,18 @@ todo list
 """
 if __name__ == '__main__':
     start = time.time()
-    current_date = 20240613
+    current_date = 20240614
     # # 周一减少3天
     check_date = current_date
     # 最新的数据
     stock_data = get_all_latest_stock()
     # # # 1、将每个股票的实时行情保存到历史数据，更新多天有问题,只更新一天，周一需要单独设置两个时间
-    # update_all_stock_data_simple("20230410", str(check_date), str(current_date))
+    update_all_stock_data_simple("20230410", str(check_date), str(current_date))
     # # 2、对数据进行选股
-    # pick_stock(stock_data, end_date=str(current_date))
+    pick_stock(stock_data, end_date=str(current_date))
     pick_stock_ang(stock_data, 20, end_date=str(current_date))
     # # 3、监控昨天选股情况
-    # check_choose_stock_change(current_date)
+    check_choose_stock_change(current_date)
 
     # 4、回测股票
     print("time cost:", time.time() - start)
