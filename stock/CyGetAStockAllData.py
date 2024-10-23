@@ -6,7 +6,7 @@ import os
 import time
 
 
-def get_stock_data_by_name(symbol, start_date='20230410', end_date='20240618'):
+def get_stock_data_by_name(symbol, start_date='20230101', end_date='20241009'):
     file_name = f"D:\\abu\\cn\\stock\\{symbol}_{start_date}_{end_date}"
     column_names = {'日期': 'date', '开盘': 'open', '收盘': 'close', '最高': 'high', '最低': 'low', '成交量': 'volume'}
 
