@@ -310,7 +310,7 @@ todo list
 """
 if __name__ == '__main__':
     start = time.time()
-    current_date = 20241023
+    current_date = 20241024
     # # 周一减少3天
     check_date = current_date - 1
     # check_date = 20241017
