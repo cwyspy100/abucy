@@ -7,8 +7,8 @@ import time
 from util import PathUtil
 
 
-def get_stock_data_by_name(symbol, start_date='20230410', end_date='20240531'):
-    file_name = f"abu/hk/stock/{symbol}_{start_date}_{end_date}"
+def get_stock_data_by_name(symbol, start_date='20240101', end_date='20241024'):
+    file_name = f"abu/hk/stock/{symbol}_{end_date}"
     # file_name = os.path.join("/Users", "water", "abu", "file.txt")
     file_path = PathUtil.get_user_path(file_name)
 
@@ -45,10 +45,12 @@ def get_all_stock_data():
         获取所有股票的数据
     """
     stock_data = pd.read_csv('20240613.csv')
+    print(stock_data.dtypes)
     # 循环获取
     for index, row in stock_data.iterrows():
         # 开头是8的股票代码，不处理
         code = row["symbol"]
+        code = f"{code:05}"
         get_stock_data_by_name(code)
         # 休息10ms
         time.sleep(0.01)
@@ -142,7 +144,7 @@ if __name__ == '__main__':
     """
     start_time = time.time()
     # pick_stock(end_date='20240415')
-    get_stock_data()
+    # get_stock_data()
     get_all_stock_data()
     # get_stock_data_by_name("301511")
     end_time = time.time()
