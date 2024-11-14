@@ -100,7 +100,7 @@ def count_stock_keep(stock_path):
     summary_df.to_csv('results_summary.csv', mode='a', header=False, index=False, encoding='utf-8-sig')
 
 
-def pick_stock_current_mean(stock_path):
+def pick_stock_current_mean(stock_path, results = []):
     # 读取股票数据
     try:
         df = pd.read_csv(stock_path)
@@ -116,7 +116,7 @@ def pick_stock_current_mean(stock_path):
     df.sort_values('date', inplace=True)
 
     # 计算 60 日均线
-    df['60_MA'] = df['close'].rolling(window=60).mean()
+    df['60_MA'] = df['close'].rolling(window=120).mean()
 
     # 寻找 60日均线小于股价的时间段
     df['Condition'] = df['60_MA'] < df['close']
@@ -128,7 +128,7 @@ def pick_stock_current_mean(stock_path):
     groups = df[df['Condition']].groupby('Group')
 
     # 统计开始时间、结束时间和持续天数
-    results = []
+    # results = []
 
     # 获取最后一组的数据
     last_group_key = groups.groups.keys() # 使用 get_group 获取最后一组
@@ -160,10 +160,10 @@ def pick_stock_current_mean(stock_path):
     # for start, end, duration, change_percent in results:
     #     print(f"开始时间: {start}, 结束时间: {end}, 持续天数: {duration}天, 涨跌幅: {change_percent}")
 
-    # 将结果转换为 DataFrame
-    results_df = pd.DataFrame(results, columns=['code', '开始时间', '结束时间', '持续天数', '涨跌幅', '平均涨幅'])
-    # 将结果写入 CSV 文件
-    results_df.to_csv('results_monitor.csv', mode='a', header=False,  index=False, encoding='utf-8-sig')
+    # # 将结果转换为 DataFrame
+    # results_df = pd.DataFrame(results, columns=['code', '开始时间', '结束时间', '持续天数', '涨跌幅', '平均涨幅'])
+    # # 将结果写入 CSV 文件
+    # results_df.to_csv('results_monitor.csv', mode='a', header=False,  index=False, encoding='utf-8-sig')
 
 
 
@@ -174,10 +174,16 @@ if __name__ == '__main__':
     start = time.time()
     directory_path = '/Users/water/abu/cn/stock'
     all_files = get_file_path(directory_path)
+    results = []
     for file in all_files:
         # print(file)
         # count_stock_keep(file)
-        pick_stock_current_mean(file)
+        pick_stock_current_mean(file, results)
+
+    # 将结果转换为 DataFrame
+    results_df = pd.DataFrame(results, columns=['code', '开始时间', '结束时间', '持续天数', '涨跌幅', '平均涨幅'])
+    # 将结果写入 CSV 文件
+    results_df.to_csv('results_monitor.csv', mode='w', header=False,  index=False, encoding='utf-8-sig')
 
     print("execute cost time {}".format(time.time() - start))
 
