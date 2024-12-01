@@ -291,9 +291,9 @@ todo list
 """
 if __name__ == '__main__':
     start = time.time()
-    current_date = 20241023
+    current_date = 20241031
     check_date = current_date - 1
-    # check_date = 20241016
+    # check_date = 20241025
     #
     # # # 1、获取股票的实时行情
     stock_data = get_all_latest_stock()

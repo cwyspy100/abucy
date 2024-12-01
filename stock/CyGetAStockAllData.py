@@ -6,7 +6,7 @@ import os
 import time
 
 
-def get_stock_data_by_name(symbol, start_date='20230101', end_date='20241009'):
+def get_stock_data_by_name(symbol, start_date='20230101', end_date='20241113'):
     file_name = f"D:\\abu\\cn\\stock\\{symbol}_{start_date}_{end_date}"
     column_names = {'日期': 'date', '开盘': 'open', '收盘': 'close', '最高': 'high', '最低': 'low', '成交量': 'volume'}
 
@@ -36,7 +36,7 @@ def get_all_stock_data():
     """
         获取所有股票的数据
     """
-    stock_data = pd.read_csv('20240409.csv')
+    stock_data = pd.read_csv('20241025.csv')
     # 循环获取
     for i in stock_data['代码']:
         # 开头是8的股票代码，不处理

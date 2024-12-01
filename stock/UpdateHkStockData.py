@@ -19,7 +19,8 @@ def get_all_latest_stock():
         # stock_data.rename(columns=column_names, inplace=True)
         print('get data from file')
     else:
-        stock_data = ak.stock_hk_spot()
+        # stock_data = ak.stock_hk_spot()
+        stock_data = ak.stock_hk_spot_em()
         stock_data.to_csv(file_name, index=False)
     return stock_data
 
@@ -260,16 +261,17 @@ def check_choose_stock_change(get_data_date):
         # 从stock_prices数据框中获取该股票的最新价格
 
         get_data = stock_latest_data.loc[stock_latest_data['symbol'] == int(code)]
-        latest_price = get_data['lasttrade'].values[0]
+        if len(get_data) > 0:
+            latest_price = get_data['lasttrade'].values[0]
 
-        # 从stock_history数据框中获取该股票的历史价格
-        historical_price = float(check_pd.loc[check_pd['code'] == code, 'price'].values[0])
+            # 从stock_history数据框中获取该股票的历史价格
+            historical_price = float(check_pd.loc[check_pd['code'] == code, 'price'].values[0])
 
-        # 计算价格变化率
-        price_change = round((latest_price - historical_price) / historical_price * 100, 2)
+            # 计算价格变化率
+            price_change = round((latest_price - historical_price) / historical_price * 100, 2)
 
-        check_pd.loc[check_pd['code'] == code, 'latest_price'] = latest_price
-        check_pd.loc[check_pd['code'] == code, 'p_change'] = price_change
+            check_pd.loc[check_pd['code'] == code, 'latest_price'] = latest_price
+            check_pd.loc[check_pd['code'] == code, 'p_change'] = price_change
 
     check_pd.to_csv(f"D:\\abu\\hk\\result\\choose_hk_stock.csv"
                     , mode='w', header=True, encoding='utf-8',
@@ -284,20 +286,20 @@ todo list
 """
 if __name__ == '__main__':
     start = time.time()
-    current_date = 20241024
+    current_date = 20241108
     # # 周一减少3天
     check_date = current_date - 1
-    # check_date = 20241017
+    check_date = 20241104
     # 最新的数据
     stock_data = get_all_latest_stock()
     # # # # # 1、将每个股票的实时行情保存到历史数据，更新多天有问题,只更新一天，周一需要单独设置两个时间
-    update_all_stock_data_simple("20220101", str(check_date), str(current_date))
-    # # # # 2、对数据进行选股
-    pick_stock(stock_data, end_date=str(current_date))
-    pick_stock_ang(stock_data, 20, end_date=str(current_date))
-    
-    # # 3、监控昨天选股情况
-    check_choose_stock_change(current_date)
+    # update_all_stock_data_simple("20220101", str(check_date), str(current_date))
+    # # # # # 2、对数据进行选股
+    # pick_stock(stock_data, end_date=str(current_date))
+    # pick_stock_ang(stock_data, 20, end_date=str(current_date))
+    #
+    # # # 3、监控昨天选股情况
+    # check_choose_stock_change(current_date)
 
     # 4、回测股票
     print("time cost:", time.time() - start)
