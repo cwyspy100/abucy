@@ -135,6 +135,7 @@ def pick_stock(stock_code_data, start_date='20230101', end_date='20240410'):
         stock_data = get_stock_data_by_name(code, start_date, end_date)
         result1 = execute_strategy_mean(stock_data, code)
         result2 = execute_strategy_ang(stock_data, 10, 'close')
+        print("mean result1 {} ang {}".format(result1, result2))
         if result1 and result2 > 3:
             choose_stock_mean.append(code)
             pick_result_df.loc[len(pick_result_df)] = [end_date, code, stock_data['close'].iloc[-1], result1, result2, total_value]
@@ -310,10 +311,10 @@ todo list
 """
 if __name__ == '__main__':
     start = time.time()
-    current_date = 20241108
+    current_date = 20241209
     # # 周一减少3天
     check_date = current_date - 1
-    # check_date = 20241105
+    check_date = 20241205
     # # 最新的数据
     stock_data = get_all_latest_stock()
     # # 1、将每个股票的实时行情保存到历史数据，更新多天有问题,只更新一天，周一需要单独设置两个时间
