@@ -118,9 +118,9 @@ def pick_stock(stock_code_data, start_date='20220101', end_date='20240410'):
             pick_result_df.loc[len(pick_result_df)] = [end_date, code, stock_data['close'].iloc[-1], result1, result2, total_value]
 
     pick_result_df.to_csv(f"D:\\abu\\us\\result\\choose_us_stock.csv", mode='a', header=True, encoding='utf-8', index=False)
-    pick_result_df.to_csv(f"D:\\abu\\us\\result\\choose_us_stock_{end_date}.csv", mode='w', header=True,
-                          encoding='utf-8',
-                          index=False)
+    # pick_result_df.to_csv(f"D:\\abu\\us\\result\\choose_us_stock_{end_date}.csv", mode='w', header=True,
+    #                       encoding='utf-8',
+    #                       index=False)
 
 
 def pick_stock_ang(stock_code_data, start_date='20220101', end_date='20240410'):
@@ -291,7 +291,7 @@ todo list
 """
 if __name__ == '__main__':
     start = time.time()
-    current_date = 20241031
+    current_date = 20241212
     check_date = current_date - 1
     # check_date = 20241025
     #

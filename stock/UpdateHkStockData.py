@@ -129,12 +129,12 @@ def pick_stock(stock_code_data, start_date='20230410', end_date='20240410'):
         result1 = execute_strategy_mean(stock_data, code)
         result2 = execute_strategy_ang(stock_data, 10, 'close')
         print("股票 {} 120日均线结果 {} 角度{}".format(code, result1, result2))
-        if result1 and result2 > 3:
+        if result1:
             choose_stock_mean.append(code)
             pick_result_df.loc[len(pick_result_df)] = [end_date, name, '\t'+code, stock_data['close'].iloc[-1], result1, result2]
 
     pick_result_df.to_csv(f"D:\\abu\\hk\\result\\choose_hk_stock.csv", mode='a', header=True, encoding='utf-8', index=False)
-    pick_result_df.to_csv(f"D:\\abu\\hk\\result\\choose_hk_stock_{end_date}.csv", mode='w', header=True, encoding='utf-8', index=False)
+    # pick_result_df.to_csv(f"D:\\abu\\hk\\result\\choose_hk_stock_{end_date}.csv", mode='w', header=True, encoding='utf-8', index=False)
 
 
 """
@@ -286,17 +286,17 @@ todo list
 """
 if __name__ == '__main__':
     start = time.time()
-    current_date = 20241209
+    current_date = 20241213
     # # 周一减少3天
     check_date = current_date - 1
-    check_date = 20241204
+    # check_date = 20241210
     # 最新的数据
     stock_data = get_all_latest_stock()
     # # # # 1、将每个股票的实时行情保存到历史数据，更新多天有问题,只更新一天，周一需要单独设置两个时间
     update_all_stock_data_simple("20220101", str(check_date), str(current_date))
     # # # # 2、对数据进行选股
     pick_stock(stock_data, end_date=str(current_date))
-    pick_stock_ang(stock_data, 20, end_date=str(current_date))
+    # pick_stock_ang(stock_data, 20, end_date=str(current_date))
 
     # # 3、监控昨天选股情况
     check_choose_stock_change(current_date)

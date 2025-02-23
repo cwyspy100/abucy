@@ -20,9 +20,9 @@ def get_all_us_stock_data():
         get_us_stock_data_by_name(i)
         # print()
         # 休息10ms
-        time.sleep(0.01)
+        time.sleep(0.002)
 
-def get_us_stock_data_by_name(symbol, start_date='20220101', end_date='20241203'):
+def get_us_stock_data_by_name(symbol, start_date='20230101', end_date='20250103'):
     file_name = f"D:\\abu\\us\\stock\\{symbol}_{start_date}_{end_date}"
     column_names = {'日期': 'date', '开盘': 'open', '收盘': 'close', '最高': 'high', '最低': 'low', '成交量': 'volume'}
 

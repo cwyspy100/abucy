@@ -51,12 +51,12 @@ def count_keep_days(file_path, current_data_path, results = []):
     change_20 = calculate_percentage_change(df['close'].values[-20:])
     change_30 = calculate_percentage_change(df['close'].values[-30:])
 
-    if pe < 0:
-        return
-    if pb < 0:
-        return
-    if total_money < 10:
-        return
+    # if pe < 0:
+    #     return
+    # if pb < 0:
+    #     return
+    # if total_money < 10:
+    #     return
 
     # 确保日期列是日期时间格式
     df['date'] = pd.to_datetime(df['date'])
@@ -146,7 +146,7 @@ def calculate_percentage_change(prices):
 if __name__ == '__main__':
     start = time.time()
     directory_path = 'D:/abu/us/stock/'
-    current_data_path = 'D:/abu/us/all/20241030.csv'
+    current_data_path = 'D:/abu/us/all/20241212.csv'
     file_path = getFilePath(directory_path)
     results = []
     for file in file_path:

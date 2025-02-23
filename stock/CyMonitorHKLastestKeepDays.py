@@ -139,7 +139,7 @@ def count_keep_days(file_path, current_data_path, results = []):
 if __name__ == '__main__':
     start = time.time()
     directory_path = 'D:/abu/hk/stock/'
-    current_data_path = 'D:/abu/hk/all/20241204.csv'
+    current_data_path = 'D:/abu/hk/all/20250103.csv'
     file_path = getFilePath(directory_path)
     results = []
     for file in file_path:

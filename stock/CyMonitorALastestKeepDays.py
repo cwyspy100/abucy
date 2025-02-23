@@ -142,7 +142,7 @@ def calculate_percentage_change(prices):
 if __name__ == '__main__':
     start = time.time()
     directory_path = 'D:/abu/cn/stock/'
-    current_data_path = 'D:/abu/cn/all/20241204.csv'
+    current_data_path = 'D:/abu/cn/all/20250103.csv'
     file_path = getFilePath(directory_path)
     results = []
     for file in file_path:
@@ -154,7 +154,7 @@ if __name__ == '__main__':
                               columns=['代码', '名称', '收盘价', '开始时间', '结束时间', '持续天数', '市盈率', '市净率',
                                        '总市值', '涨跌幅', '5日涨跌幅','10日涨跌幅','20日涨跌幅','30日涨跌幅', '60日涨跌幅', '年初至今涨跌幅', '上涨天数', '下跌天数', '涨幅天数比率'])
     # 将结果写入 CSV 文件
-    results_df.to_csv('D:/abu/cn/all/results_monitor_20241204.csv', index=False, encoding='utf-8-sig')
+    results_df.to_csv('D:/abu/cn/all/results_monitor_20250103.csv', index=False, encoding='utf-8-sig')
 
     # count_keep_days('D:/abu/cn/stock/300046_20230101_20241025', current_data_path)
 

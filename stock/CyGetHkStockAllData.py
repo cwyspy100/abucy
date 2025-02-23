@@ -6,7 +6,7 @@ import os
 import time
 
 
-def get_stock_data_by_name(symbol, end_date='20241204'):
+def get_stock_data_by_name(symbol, end_date='20250217'):
     file_name = f"D:\\abu\\hk\\stock\\{symbol}_{end_date}"
 
     if os.path.exists(file_name):
