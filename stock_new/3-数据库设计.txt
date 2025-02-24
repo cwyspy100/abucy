@@ -1,0 +1,145 @@
+# 股票监控与投资决策系统数据库设计
+
+## 1. 数据库基本信息
+
+- 数据库名称：wealth_data
+- 字符集：utf8mb4
+- 排序规则：utf8mb4_unicode_ci
+- 存储引擎：InnoDB
+
+## 2. 基础配置表
+
+### 2.1 证券类型维护表(security_type)
+
+| 字段名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| type_code | VARCHAR(2) | 是 | 类型代码，主键 |
+| type_name | VARCHAR(50) | 是 | 类型名称 |
+| created_at | TIMESTAMP | 是 | 创建时间 |
+| updated_at | TIMESTAMP | 是 | 更新时间 |
+| deleted | TINYINT(1) | 是 | 删除标记 |
+
+### 2.2 市场维护表(market)
+
+| 字段名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| market_code | VARCHAR(2) | 是 | 市场代码，主键 |
+| market_name | VARCHAR(50) | 是 | 市场名称 |
+| created_at | TIMESTAMP | 是 | 创建时间 |
+| updated_at | TIMESTAMP | 是 | 更新时间 |
+| deleted | TINYINT(1) | 是 | 删除标记 |
+
+### 2.3 行业分类表(industry)
+
+| 字段名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| industry_l1_code | VARCHAR(3) | 是 | 一级行业代码 |
+| industry_l1_name | VARCHAR(50) | 是 | 一级行业名称 |
+| industry_l2_code | VARCHAR(6) | 是 | 二级行业代码，主键 |
+| industry_l2_name | VARCHAR(50) | 是 | 二级行业名称 |
+| created_at | TIMESTAMP | 是 | 创建时间 |
+| updated_at | TIMESTAMP | 是 | 更新时间 |
+| deleted | TINYINT(1) | 是 | 删除标记 |
+
+## 3. 业务数据表
+
+### 3.1 证券基本信息表(security_info)
+
+| 字段名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| security_code | VARCHAR(20) | 是 | 证券代码，主键 |
+| security_name | VARCHAR(100) | 是 | 证券名称 |
+| market_code | VARCHAR(2) | 是 | 市场代码，外键 |
+| type_code | VARCHAR(2) | 是 | 证券类型代码，外键 |
+| industry_l2_code | VARCHAR(6) | 是 | 二级行业代码，外键 |
+| listing_date | DATE | 是 | 上市日期 |
+| created_at | TIMESTAMP | 是 | 创建时间 |
+| updated_at | TIMESTAMP | 是 | 更新时间 |
+| deleted | TINYINT(1) | 是 | 删除标记 |
+
+### 3.2 证券日线行情表(stock_daily)
+
+| 字段名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| security_code | VARCHAR(20) | 是 | 证券代码 |
+| trade_date | DATE | 是 | 交易日期 |
+| open_price | DECIMAL(20,4) | 是 | 开盘价 |
+| close_price | DECIMAL(20,4) | 是 | 收盘价 |
+| high_price | DECIMAL(20,4) | 是 | 最高价 |
+| low_price | DECIMAL(20,4) | 是 | 最低价 |
+| volume | BIGINT | 是 | 成交量 |
+| amount | DECIMAL(20,4) | 是 | 成交额 |
+| created_at | TIMESTAMP | 是 | 创建时间 |
+| updated_at | TIMESTAMP | 是 | 更新时间 |
+| deleted | TINYINT(1) | 是 | 删除标记 |
+
+注：按市场和年份分区
+
+### 3.3 财务数据表(stock_financial)
+
+| 字段名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| security_code | VARCHAR(20) | 是 | 证券代码 |
+| report_date | DATE | 是 | 报告期 |
+| revenue | DECIMAL(20,4) | 否 | 营业收入(元) |
+| net_profit | DECIMAL(20,4) | 否 | 净利润(元) |
+| eps | DECIMAL(10,4) | 否 | 每股收益(元) |
+| roe | DECIMAL(10,4) | 否 | 净资产收益率(%) |
+| pe_ratio | DECIMAL(10,4) | 否 | 市盈率 |
+| pb_ratio | DECIMAL(10,4) | 否 | 市净率 |
+| created_at | TIMESTAMP | 是 | 创建时间 |
+| updated_at | TIMESTAMP | 是 | 更新时间 |
+| deleted | TINYINT(1) | 是 | 删除标记 |
+
+### 3.4 技术指标表(technical_indicator)
+
+| 字段名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| security_code | VARCHAR(20) | 是 | 证券代码 |
+| trade_date | DATE | 是 | 交易日期 |
+| ma5 | DECIMAL(20,4) | 否 | 5日均线 |
+| ma10 | DECIMAL(20,4) | 否 | 10日均线 |
+| ma20 | DECIMAL(20,4) | 否 | 20日均线 |
+| ma60 | DECIMAL(20,4) | 否 | 60日均线 |
+| ma120 | DECIMAL(20,4) | 否 | 120日均线 |
+| rsi6 | DECIMAL(10,4) | 否 | 6日RSI |
+| rsi12 | DECIMAL(10,4) | 否 | 12日RSI |
+| rsi24 | DECIMAL(10,4) | 否 | 24日RSI |
+| volume_ma5 | BIGINT | 否 | 5日成交量均线 |
+| volume_ma10 | BIGINT | 否 | 10日成交量均线 |
+| created_at | TIMESTAMP | 是 | 创建时间 |
+| updated_at | TIMESTAMP | 是 | 更新时间 |
+| deleted | TINYINT(1) | 是 | 删除标记 |
+
+## 4. 索引设计
+
+### 4.1 证券基本信息表(security_info)
+- 主键：security_code
+- 外键：market_code, type_code, industry_l2_code
+- 索引：listing_date
+
+### 4.2 证券日线行情表(stock_daily)
+- 联合主键：(security_code, trade_date)
+- 索引：trade_date
+
+### 4.3 财务数据表(stock_financial)
+- 联合主键：(security_code, report_date)
+- 索引：report_date
+
+### 4.4 技术指标表(technical_indicator)
+- 联合主键：(security_code, trade_date)
+- 索引：trade_date
+
+## 5. 分区策略
+
+### 5.1 证券日线行情表(stock_daily)
+- 按市场分区：CN(A股)、HK(港股)、US(美股)
+- 每个市场按年份子分区
+
+### 5.2 财务数据表(stock_financial)
+- 按市场分区
+- 每个市场按年份子分区
+
+### 5.3 技术指标表(technical_indicator)
+- 按市场分区
+- 每个市场按年份子分区
