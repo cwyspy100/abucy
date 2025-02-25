@@ -43,13 +43,16 @@ CREATE TABLE industry (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='行业分类表';
 
 -- 证券基本信息表
+drop table security_info;
+-- 证券基本信息表
 CREATE TABLE security_info (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     security_code VARCHAR(20) NOT NULL COMMENT '证券代码',
     security_name VARCHAR(100) NOT NULL COMMENT '证券名称',
     market_code VARCHAR(2) NOT NULL COMMENT '市场代码',
     type_code VARCHAR(2) NOT NULL COMMENT '证券类型代码',
-    industry_l2_code VARCHAR(6) COMMENT '所属二级行业代码',
+		industry_1 VARCHAR(50) COMMENT '所属行业',
+    industry_2 VARCHAR(50) COMMENT '细分行业',
     listing_date DATE COMMENT '上市日期',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -57,10 +60,7 @@ CREATE TABLE security_info (
     PRIMARY KEY (id),
     UNIQUE KEY uk_security_code (security_code),
     KEY idx_market_type (market_code, type_code),
-    KEY idx_industry (industry_l2_code),
-    CONSTRAINT fk_market FOREIGN KEY (market_code) REFERENCES market(market_code),
-    CONSTRAINT fk_type FOREIGN KEY (type_code) REFERENCES security_type(type_code),
-    CONSTRAINT fk_industry FOREIGN KEY (industry_l2_code) REFERENCES industry(industry_l2_code)
+    KEY idx_industry (industry_1)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='证券基本信息表';
 
 -- 证券日线行情表
@@ -124,6 +124,23 @@ CREATE TABLE technical_indicator (
     UNIQUE KEY uk_security_trade (security_code, trade_date),
     KEY idx_trade_date (trade_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='技术指标表';
+
+drop table stock_pool
+-- 创建股票池表
+CREATE TABLE IF NOT EXISTS `stock_pool` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `security_code` varchar(20) NOT NULL COMMENT '股票代码',
+    `security_name` varchar(50) NOT NULL COMMENT '股票名称',
+    `year_start_price` decimal(10,2) NOT NULL COMMENT '年初价格',
+    `current_price` decimal(10,2) default 0.00 COMMENT '当前价格',
+    `year_change_rate` decimal(10,2) default 0.00 COMMENT '年度涨跌幅(%)',
+    `created_at` datetime NOT NULL COMMENT '创建时间',
+    `updated_at` datetime NOT NULL COMMENT '更新时间',
+    `deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除(0-未删除，1-已删除)',
+    PRIMARY KEY (`id`),
+    KEY `idx_security_code` (`security_code`),
+    KEY `idx_year_change_rate` (`year_change_rate`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='股票池表';
 
 -- 插入基础数据
 INSERT INTO security_type (type_code, type_name) VALUES
