@@ -34,7 +34,7 @@ class GetStockDailyData:
         try:
             # 计算两年前的日期
             end_date = datetime.now()
-            start_date = end_date - timedelta(days=730)
+            start_date = end_date - timedelta(days=60)
             
             # 使用akshare获取股票数据
             # 获取股票代码的后六位

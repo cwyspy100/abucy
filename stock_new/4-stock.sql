@@ -80,8 +80,7 @@ CREATE TABLE stock_daily (
     PRIMARY KEY (id),
     UNIQUE KEY uk_security_trade (security_code, trade_date),
     KEY idx_trade_date (trade_date)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-PARTITION BY LIST COLUMNS(security_code) COMMENT='证券日线行情表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='证券日线行情表';
 
 -- 财务数据表
 CREATE TABLE stock_financial (
@@ -159,3 +158,35 @@ INSERT INTO industry (industry_l1_code, industry_l1_name, industry_l2_code, indu
 ('A01', '信息技术', 'A0102', '硬件设备'),
 ('B01', '金融', 'B0101', '银行'),
 ('B01', '金融', 'B0102', '证券');
+
+
+CREATE TABLE IF NOT EXISTS market_daily (
+            id BIGINT PRIMARY KEY AUTO_INCREMENT,
+            trade_date DATE NOT NULL,
+            code VARCHAR(10) NOT NULL,
+            name VARCHAR(50) NOT NULL,
+            latest_price DECIMAL(10,2),
+            change_percent DECIMAL(10,2),
+            change_amount DECIMAL(10,2),
+            volume BIGINT,
+            amount DECIMAL(20,2),
+            amplitude DECIMAL(10,2),
+            high_price DECIMAL(10,2),
+            low_price DECIMAL(10,2),
+            open_price DECIMAL(10,2),
+            pre_close DECIMAL(10,2),
+            volume_ratio DECIMAL(10,2),
+            turnover_rate DECIMAL(10,2),
+            pe_ratio DECIMAL(10,2),
+            pb_ratio DECIMAL(10,2),
+            total_market_value DECIMAL(20,2),
+            circulating_market_value DECIMAL(20,2),
+            change_speed DECIMAL(10,2),
+            change_5min DECIMAL(10,2),
+            change_60day DECIMAL(10,2),
+            change_year DECIMAL(10,2),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            deleted TINYINT(1) DEFAULT 0,
+            UNIQUE KEY idx_code_date (code, trade_date)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
