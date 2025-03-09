@@ -34,7 +34,7 @@ class GetStockDailyData:
         try:
             # 计算两年前的日期
             end_date = datetime.now()
-            start_date = end_date - timedelta(days=60)
+            start_date = end_date - timedelta(days=200)
             
             # 使用akshare获取股票数据
             # 获取股票代码的后六位
@@ -82,7 +82,7 @@ class GetStockDailyData:
             # 确保日期格式正确
             stock_data['trade_date'] = pd.to_datetime(stock_data['trade_date']).dt.date
             
-            # print(stock_data.head())
+            print(stock_data.head())
             return stock_data
         except Exception as e:
             print(f"获取股票 {stock_code} 的数据失败: {str(e)}")
@@ -122,7 +122,7 @@ class GetStockDailyData:
             # 获取数据库中已有的数据
             query = f"""SELECT trade_date FROM stock_daily
                       WHERE security_code = '{stock_code}'
-                      AND trade_date = '2025-02-21'
+                      AND trade_date = '2025-03-07'
                       AND deleted = 0
                       ORDER BY trade_date DESC
                       LIMIT 1"""
@@ -135,6 +135,7 @@ class GetStockDailyData:
                 self.save_stock_data(stock_data)
                 # 添加延时避免请求过于频繁
                 time.sleep(1)
+            break
 
 def main():
     collector = GetStockDailyData()

@@ -34,7 +34,7 @@ class GetStockDailyData:
         try:
             # 计算两年前的日期
             end_date = datetime.now()
-            start_date = end_date - timedelta(days=730)
+            start_date = end_date - timedelta(days=200)
             
             # 使用akshare获取股票数据
             # 获取股票代码的后六位
@@ -122,7 +122,7 @@ class GetStockDailyData:
             # 获取数据库中已有的数据
             query = f"""SELECT trade_date FROM stock_daily
                       WHERE security_code = '{tmp_stock_code}'
-                      AND trade_date = '2025-02-21'
+                      AND trade_date = '2025-03-07'
                       AND deleted = 0
                       ORDER BY trade_date DESC
                       LIMIT 1"""
